@@ -107,7 +107,6 @@ function Home() {
   }, [realmsList, sandboxes]);
 
   useEffect(() => {
-    console.log(selectedRealmSandboxes);
   }, [selectedRealmSandboxes]);
 
   return (

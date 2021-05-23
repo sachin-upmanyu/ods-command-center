@@ -197,7 +197,6 @@ router.get('/logout', async (req, res, next) => {
  */
 router.get('/sandbox/realms/list', async (req, res, next) => {
   try {
-    console.log(process.env.EMAIL_ADDRESS);
     const filePath = path.resolve(process.cwd(), 'cli.js');
     var returnData = '';
     const child = spawn('node', [filePath, 'sandbox:realm:list', '-j']);
@@ -853,13 +852,11 @@ router.get('/credits-usage/:realmId', async (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.log(creditList)
       console.log('There was an error querying credits', JSON.stringify(err))
       res.status(400).json('Error')
     });
     //calculate credits from the sandox data
   } catch (err) {
-      console.log('creditList')
       next(err);
   }
 });
@@ -882,7 +879,6 @@ router.get('/notify-user', async (req, res, next) => {
         var creditListData = element.toJSON();
         var dataKey = cron_time_check_arr.findIndex(keyVal => keyVal === element.notifyCheck);
         if (element.notifyCheck < cron_time_check_arr[dataKey] && realmId == element.realmId) {
-          console.log(realmId, cron_time_check_arr[dataKey]);
           //send email to the user to notify that cron_time_check_arr[dataKey] time is consumed.
           const mailData = {
             from: process.env.EMAIL_ADDRESS,  // sender address
@@ -905,39 +901,7 @@ router.get('/notify-user', async (req, res, next) => {
     .catch((err) => {
       console.log('There was an error querying credits', JSON.stringify(err))
       res.status(400).json('Error')
-      // return res.send(err)
     });
-    // var dataList = [{'credit':'dfsd', 'realmId': 'adda', 'notifyCheck' : 50}, {'credit':'dfsdsaas', 'realmId': 'adda12', 'notifyCheck' : 90}, {'credit':'saa', 'realmId': 'adda12', 'notifyCheck' : 0}];
-    // // calculate the realm time for the user
-    // var cron_time_check_arr = [50, 75, 90, 95, 99];
-    // var realm_a_time_consumed = 75;
-    // var realm_b_time_consumed = 93;
-    // dataList.forEach(dataset => {
-    //   //check for first realm
-    //   var realmId = 'adda';
-    //   var dataKey = cron_time_check_arr.findIndex(element => element === realm_a_time_consumed);
-    //   if (dataset.notifyCheck < cron_time_check_arr[dataKey] && realmId == dataset.realmId) {
-    //     console.log(realmId, cron_time_check_arr[dataKey]);
-    //     //send email to the user to notify that cron_time_check_arr[dataKey] time is consumed.
-    //     const mailData = {
-    //       from: 'priti.kabra@dotsquares.com',  // sender address
-    //       to: 'priti@mailinator.com',   // list of receivers
-    //       subject: 'Sending Email using Node.js',
-    //       text: 'That was easy!',
-    //       html: '<b>Hey there! </b> <br> This is our first message sent with Nodemailer<br/>',
-    //     };
-    //     // transporter.sendMail(mailData, function (err, info) {
-    //     //   if(err) console.log(err)
-    //     //   // else
-    //     //   //   console.log(info);
-    //     // });
-    //     //update notifyCheck to realm_a_time_consumed
-    //     res.status(200).json({'realmId':realmId});
-    //   } else {
-    //     res.status(200).json(dataKey);
-    //   }
-    // });
-    // res.status(200).json('sd');
   } catch (err) {
     console.log(err)
     next(err);
