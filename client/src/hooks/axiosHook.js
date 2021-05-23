@@ -9,7 +9,6 @@ export const api = axios.create({
 });
 
 export const useAxios = () => {
-  console.log(process.env.REACT_APP_ENV);
   const getRequest = (url) => {
     return api
       .get(url)

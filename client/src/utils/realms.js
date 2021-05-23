@@ -7,11 +7,11 @@ export const allRealms = [
     createdSandboxes: 24,
     activeSandboxes: 24,
     deletedSandboxes: 22,
-    sandboxSeconds: 54040750,
+    sandboxSeconds: 50000000,
     minutesUpByProfile: [
       {
         profile: 'medium',
-        minutes: 900667,
+        minutes: 900000,
       },
     ],
     minutesUp: 500,
@@ -22,11 +22,11 @@ export const allRealms = [
     createdSandboxes: 24,
     activeSandboxes: 24,
     deletedSandboxes: 22,
-    sandboxSeconds: 54040750,
+    sandboxSeconds: 60000000,
     minutesUpByProfile: [
       {
         profile: 'medium',
-        minutes: 900667,
+        minutes: 900000,
       },
     ],
     minutesUp: 123,
