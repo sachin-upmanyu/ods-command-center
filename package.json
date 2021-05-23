@@ -1,0 +1,27 @@
+{
+  "name": "sfcc-ci-dashboard",
+  "version": "1.0.0",
+  "description": "Performs On Demand Sandbox use-cases on easy to use GUI using sfcc-ci as backend",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "cd server && node src/index.js",
+    "client:install": "cd client && npm install",
+    "build:server": "cd server && npm install",
+    "build:client": "cd client && npm run build",
+    "start:production": "cd server && node src/index.js",
+    "build": "npm run client:install && npm run build:client && npm run build:server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sachin-upmanyu/sfcc-ci-dashboard.git"
+  },
+  "keywords": [
+    "sfcc-ci"
+  ],
+  "author": "Sachin Upmanyu",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sachin-upmanyu/sfcc-ci-dashboard/issues"
+  },
+  "homepage": "https://github.com/sachin-upmanyu/sfcc-ci-dashboard#readme"
+}

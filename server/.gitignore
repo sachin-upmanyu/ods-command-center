@@ -1,0 +1,4 @@
+node_modules
+# dw.json
+.vscode
+database.sqlite3
