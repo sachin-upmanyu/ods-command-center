@@ -190,7 +190,7 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
           </Flex>
         </Flex>
       </Box>
-      <Table my='1' overflowY='scroll' maxHeight='500px' display='block'>
+      <Table my='1' overflowY='scroll' maxHeight='500px'>
         <Thead>
           <Tr>
             {tableColumns.map((c, i) => (
