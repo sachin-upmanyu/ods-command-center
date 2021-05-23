@@ -74,7 +74,7 @@ You can easily set this up on Heroku or your preferred hosting solution, so that
 ## Credits
 ODS Command Center is using [SFCC-CI](https://github.com/SalesforceCommerceCloud/sfcc-ci) Javascript APIs under the hood and was created for Salesforce Community by
 - [Sachin Upmanyu](https://github.com/sachin-upmanyu)
-- [Priti Kabra](https://github.com/pritikabra1993)
+- [Priti Kabra](https://github.com/priti-kabra)
 - [Keshav Kabra](https://github.com/ksvkabra)
 
 ## Contributing
