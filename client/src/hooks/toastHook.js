@@ -2,7 +2,7 @@ import { useToast } from '@chakra-ui/react';
 
 const defaultOptions = {
   duration: 4000,
-  position: 'top-right',
+  position: 'top',
   isClosable: true,
 };
 
