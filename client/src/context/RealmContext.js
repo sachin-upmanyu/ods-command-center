@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 const RealmContext = React.createContext([{}, () => {}]);
 
 const RealmProvider = (props) => {
-  const [state, setState] = useState(null);
+  const [state, setState] = useState();
 
   return (
     <RealmContext.Provider value={[state, setState]}>

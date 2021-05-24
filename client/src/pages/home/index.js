@@ -101,12 +101,14 @@ function Home() {
   }, []);
 
   useEffect(() => {
-    if (realmsList.length && sandboxes.length && !selectedRealm) {
-       selectRealm(realmsList[0]);
-    } else {
-      const x = sandboxes.filter((s) => s.realm === selectedRealm.id);
-      setSelectedRealmSandboxes(x);
-    }
+    if (realmsList.length && sandboxes.length) {
+        if(selectedRealm) {
+          const x = sandboxes.filter((s) => s.realm === selectedRealm.id);
+          setSelectedRealmSandboxes(x);
+        } else {
+          selectRealm(realmsList[0]);
+        }
+    } 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [realmsList, sandboxes]);
 
