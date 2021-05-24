@@ -27,7 +27,7 @@ function UsageTable({ usageData }) {
         </Thead>
         <Tbody>
           {usageData.history && usageData.history.map((s, i) => (
-            <Tr>
+            <Tr key={i}>
               <Td>{i + 1}</Td>
               <Td>
                 {s.from && new Intl.DateTimeFormat('en-US', {

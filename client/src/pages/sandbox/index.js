@@ -69,12 +69,21 @@ function Sandbox(props) {
       `/sandbox/stats/${sandboxId}/operations`
     );
     setIsLoading(false);
+
     if (sandboxOperations.error) {
       errorToastMessage({
         title: sandboxOperations.message,
       });
       return;
     }
+
+    if(!Array.isArray(sandboxOperations)) {
+      errorToastMessage({
+        title: 'Could not find operations history for this sandbox.',
+      });
+      return;
+    }
+
     setSandboxOperationDetails(sandboxOperations);
   };
 
@@ -88,7 +97,10 @@ function Sandbox(props) {
       });
       return;
     }
-    setSandboxLinks(sandboxListOfLinks.sandbox.links);
+
+    if(sandboxListOfLinks?.sandbox?.links) {
+      setSandboxLinks(sandboxListOfLinks.sandbox.links);
+    }
   };
 
   useEffect(() => {
