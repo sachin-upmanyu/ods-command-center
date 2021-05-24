@@ -27,7 +27,7 @@ function OperationsTable({ operationsData }) {
         </Thead>
         <Tbody>
           {operationsData.map((s, i) => (
-            <Tr>
+            <Tr key={i}>
               <Td>{i + 1}</Td>
               <Td>{s.id}</Td>
               <Td>

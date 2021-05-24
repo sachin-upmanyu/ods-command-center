@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const api = axios.create({
-  baseURL:process.env.REACT_APP_ENV == 'development' ? 
+  baseURL:process.env.REACT_APP_ENV === 'development' ? 
     process.env.REACT_APP_LOCAL_SERVER_URL : process.env.REACT_APP_PROD_SERVER_URL,
   headers: {
     authorization: "demo",

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Grid,
+  Heading,
   Menu,
   MenuItem,
   MenuButton,
@@ -68,12 +69,21 @@ function Sandbox(props) {
       `/sandbox/stats/${sandboxId}/operations`
     );
     setIsLoading(false);
+
     if (sandboxOperations.error) {
       errorToastMessage({
         title: sandboxOperations.message,
       });
       return;
     }
+
+    if(!Array.isArray(sandboxOperations)) {
+      errorToastMessage({
+        title: 'Could not find operations history for this sandbox.',
+      });
+      return;
+    }
+
     setSandboxOperationDetails(sandboxOperations);
   };
 
@@ -87,7 +97,10 @@ function Sandbox(props) {
       });
       return;
     }
-    setSandboxLinks(sandboxListOfLinks.sandbox.links);
+
+    if(sandboxListOfLinks?.sandbox?.links) {
+      setSandboxLinks(sandboxListOfLinks.sandbox.links);
+    }
   };
 
   useEffect(() => {
@@ -100,6 +113,7 @@ function Sandbox(props) {
 
   return (
     <HeaderWrapper pageTitle='Home'>
+      <Heading my='4'>Sandbox: {sandboxId}</Heading>
       <Grid templateColumns='repeat(3,1fr)' gap='2'>
         <StatsCard
           icon={<MdAccessTime />}
