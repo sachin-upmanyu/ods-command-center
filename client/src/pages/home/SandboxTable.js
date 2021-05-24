@@ -226,8 +226,8 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
                       <MenuItem onClick={()=>handleStart(s.id)}>Start</MenuItem>
                       <MenuItem onClick={()=>handleStop(s.id)}>Stop</MenuItem>
                       <MenuItem onClick={()=>handleRestart(s.id)}>Restart</MenuItem>
-                      <MenuItem onClick={()=>window.confirm('Are you sure you want to reset sandbox?') && handleReset(s.id) }>Reset</MenuItem>
-                      <MenuItem onClick={()=>window.confirm('Are you sure you want to delete this sandbox?') && handleDelete(s.id) }>Delete</MenuItem>
+                      <MenuItem onClick={()=>window.confirm('Are you sure you want to reset this sandbox (' + s.instance +  ')?') && handleReset(s.id) }>Reset</MenuItem>
+                      <MenuItem onClick={()=>window.confirm('Are you sure you want to delete this sandbox (' + s.instance +  ')?') && handleDelete(s.id) }>Delete</MenuItem>
                     </MenuList>
                   </Menu>
                 </Td>
