@@ -59,7 +59,7 @@ ODS Command Center is built on React + Node.js, leverages SFCC-CI Javascript API
 - Add SMTP details in server/src/routes.js *(optional)*. Alternatively you'll be able to manage this in Notification Center(upcoming)
 
 ## Running on Local system
-- We would require NPM to be available on local system, if you don't have it already installed check installation instruction for [NVM](https://github.com/nvm-sh/nvm)(recommended, so that you can easilt manage multiple node versions) or install Node.js through [official site](https://nodejs.org/)
+- We would require NPM to be available on local system, recommended Node version is 12.19.0. If you don't have it already installed check installation instruction for [NVM](https://github.com/nvm-sh/nvm)(recommended, so that you can easilt manage multiple node versions) or install Node.js through [official site](https://nodejs.org/)
 - Go to `<local_folder>` and run `npm run build`, after build process is complete run `npm start` command.
 - goto `localhost:3009` in your web browser.
 - Login using your preferred method.

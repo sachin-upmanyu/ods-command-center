@@ -6,7 +6,6 @@ const db = require('../models');
 const sequelize = require('sequelize');
 const nodemailer = require('nodemailer');
 const { exit } = require('process');
-const { randomInt } = require('crypto');
 require('dotenv').config();
 
 const transporter = nodemailer.createTransport({
@@ -99,7 +98,7 @@ router.post('/client/login', async (req, res, next) => {
         next();
         return;
       }
-      res.status(200).json({'login': true, 'token': randomInt(50000)});
+      res.status(200).json({'login': true, 'token': Math.random(50000)});
     });
 
     child.on('error', err => {
@@ -150,7 +149,7 @@ router.get('/dwjson/login', async (req, res, next) => {
         next(code);
         return;
       }
-      res.status(200).json({'login': true, 'token': randomInt(50000)});
+      res.status(200).json({'login': true, 'token': Math.random(50000)});
     });
 
     child.on('error', err => {
