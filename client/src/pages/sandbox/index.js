@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Grid,
+  Heading,
   Menu,
   MenuItem,
   MenuButton,
@@ -100,6 +101,7 @@ function Sandbox(props) {
 
   return (
     <HeaderWrapper pageTitle='Home'>
+      <Heading my='4'>Sandbox: {sandboxId}</Heading>
       <Grid templateColumns='repeat(3,1fr)' gap='2'>
         <StatsCard
           icon={<MdAccessTime />}
