@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   Grid,
   Heading,
@@ -24,6 +24,7 @@ import OperationsTable from './OperationsTable';
 import { useAxios } from '../../hooks/axiosHook';
 import { useToastMessage } from '../../hooks/toastHook';
 import CenterSpinner from '../../components/centerSpinner/CenterSpinner';
+import { RealmContext } from '../../context/RealmContext';
 
 function Sandbox(props) {
   const [sandboxUsageDetails, setSandboxUsageDetails] = useState([]);
@@ -33,6 +34,7 @@ function Sandbox(props) {
   const { getRequest } = useAxios();
   const { errorToastMessage } = useToastMessage();
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedRealm] = useContext(RealmContext);
 
   // get data of a sandbox
   const getSandboxData = async () => {
@@ -113,7 +115,7 @@ function Sandbox(props) {
 
   return (
     <HeaderWrapper pageTitle='Home'>
-      <Heading my='4'>Sandbox: {sandboxId}</Heading>
+      <Heading my='4'>{selectedRealm.id}: {sandboxId}</Heading>
       <Grid templateColumns='repeat(3,1fr)' gap='2'>
         <StatsCard
           icon={<MdAccessTime />}

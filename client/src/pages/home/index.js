@@ -1,6 +1,6 @@
 import { Grid, Flex, Heading } from '@chakra-ui/react';
 
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Helmet } from 'react-helmet';
 import StatsCard from '../../components/statsCard/StatsCard';
 import HeaderWrapper from '../../hoc/HeaderWrapper';
@@ -14,11 +14,12 @@ import { BsStopwatch } from 'react-icons/bs';
 import { useAxios } from '../../hooks/axiosHook';
 import { useToastMessage } from '../../hooks/toastHook';
 import CenterSpinner from '../../components/centerSpinner/CenterSpinner';
+import { RealmContext } from '../../context/RealmContext';
 
 function Home() {
   const [sandboxes, setSandboxes] = useState([]);
   const [selectedRealmSandboxes, setSelectedRealmSandboxes] = useState([]);
-  const [selectedRealm, setSelectedRealm] = useState();
+  const [selectedRealm, setSelectedRealm] = useContext(RealmContext);
   const [realmsList, setRealmsList] = useState([]);
   const { getRequest } = useAxios();
   const { errorToastMessage } = useToastMessage();
@@ -100,14 +101,16 @@ function Home() {
   }, []);
 
   useEffect(() => {
-    if (realmsList.length && sandboxes.length && !selectedRealm) {
-      selectRealm(realmsList[0]);
-    }
+    if (realmsList.length && sandboxes.length) {
+        if(selectedRealm) {
+          const x = sandboxes.filter((s) => s.realm === selectedRealm.id);
+          setSelectedRealmSandboxes(x);
+        } else {
+          selectRealm(realmsList[0]);
+        }
+    } 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [realmsList, sandboxes]);
-
-  useEffect(() => {
-  }, [selectedRealmSandboxes]);
 
   return (
     <HeaderWrapper
