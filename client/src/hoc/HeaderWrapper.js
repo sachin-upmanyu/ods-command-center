@@ -35,7 +35,9 @@ function HeaderWrapper({ children, pageTitle, realms, handleSelect }) {
         alignItems='center'
         px='4'
       >
-        <Heading color='twitter.500'><Link to='/'>{pageTitle}</Link></Heading>
+        <Heading color='twitter.500'>
+          <Link to='/'>{pageTitle}</Link>
+        </Heading>
         <Box>
           {realms && (
             <Menu>

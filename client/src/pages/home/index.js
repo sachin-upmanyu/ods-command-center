@@ -35,7 +35,7 @@ function Home() {
         window.location.href = '/login';
       }
       errorToastMessage({
-        title: res.message,
+        title: res.message ?? 'Error Occurred, please try again',
       });
       return;
     }
@@ -54,7 +54,7 @@ function Home() {
     );
     if (realmUsage.error) {
       errorToastMessage({
-        title: realmUsage.message,
+        title: realmUsage.message ?? 'Error Occurred, please try again',
       });
       setIsLoading(false);
       return;
@@ -68,7 +68,7 @@ function Home() {
     setIsLoading(false);
     if (res.error) {
       errorToastMessage({
-        title: res.message,
+        title: res.message ?? 'Error Occurred, please try again',
       });
       return;
     }
@@ -87,7 +87,7 @@ function Home() {
     setIsLoading(false);
     if (data.error) {
       errorToastMessage({
-        title: data.message,
+        title: data.message ?? 'Error Occurred, please try again',
       });
       return;
     }
@@ -102,13 +102,13 @@ function Home() {
 
   useEffect(() => {
     if (realmsList.length && sandboxes.length) {
-        if(selectedRealm) {
-          const x = sandboxes.filter((s) => s.realm === selectedRealm.id);
-          setSelectedRealmSandboxes(x);
-        } else {
-          selectRealm(realmsList[0]);
-        }
-    } 
+      if (selectedRealm) {
+        const x = sandboxes.filter((s) => s.realm === selectedRealm.id);
+        setSelectedRealmSandboxes(x);
+      } else {
+        selectRealm(realmsList[0]);
+      }
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [realmsList, sandboxes]);
 
@@ -124,20 +124,30 @@ function Home() {
           <Heading>{selectedRealm.id}</Heading>
           <Flex flexWrap='wrap'>
             <Grid
-              templateColumns='repeat(4, 1fr)'
+              templateColumns={{
+                base: 'repeat(1, 1fr)',
+                sm: 'repeat(2, 1fr)',
+                lg: 'repeat(4, 1fr)',
+              }}
               gap='4'
               w='full'
               m='2'
             >
               <StatsCard
                 title={'Number of Sandboxes'}
-                content={selectedRealm.createdSandboxes-selectedRealm.deletedSandboxes}
+                content={
+                  selectedRealm.createdSandboxes -
+                  selectedRealm.deletedSandboxes
+                }
                 icon={<AiOutlineCodeSandbox />}
                 color='twitter.500'
               />
               <StatsCard
                 title='Credits Remaining'
-                content={selectedRealm.remainingCredits && selectedRealm.remainingCredits.toFixed(2)}
+                content={
+                  selectedRealm.remainingCredits &&
+                  selectedRealm.remainingCredits.toFixed(2)
+                }
                 icon={<BsStopwatch />}
                 color='black'
               />
@@ -154,17 +164,26 @@ function Home() {
                 color='red'
               />
             </Grid>
-            <Flex w='100%' p='2' justifyContent='space-between'>
+            <Flex w='100%' p='2'>
               <SandboxTable
                 sandboxTableList={selectedRealmSandboxes}
                 realmId={selectedRealm.id}
-                realmData= {selectedRealm}
+                realmData={selectedRealm}
               />
             </Flex>
-            <Flex w='100%'>
-              {selectedRealm.id && <CreditHistory realmId={selectedRealm.id} />}
+            <Grid
+              templateColumns={{ base: 'repeat(1, 1fr)', lg: 'repeat(2,1fr)' }}
+              gap='2'
+              p='2'
+              w='100%'
+            >
+              {selectedRealm.id && (
+                <Flex w='100%' overflowX='auto'>
+                  <CreditHistory realmId={selectedRealm.id} />
+                </Flex>
+              )}
               <CreditsPieChart realmDataFromServer={selectedRealm} />
-            </Flex>
+            </Grid>
           </Flex>
         </>
       )) || <Heading>No realms</Heading>}

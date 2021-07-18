@@ -52,7 +52,7 @@ function CreditHistoryFormDialog({ isOpen, handleClose, submit, realmId }) {
     setIsLoading(false);
     if (res.error) {
       errorToastMessage({
-        title: res.message,
+        title: res.message ?? 'Error Occurred, please try again',
       });
       return;
     }

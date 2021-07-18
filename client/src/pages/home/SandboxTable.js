@@ -38,7 +38,7 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
     setIsLoading(false);
     if (res.error) {
       errorToastMessage({
-        title: res.message,
+        title: res.message ?? 'Error Occurred, please try again',
       });
       return;
     }
@@ -52,7 +52,7 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
     setIsLoading(false);
     if (res.error) {
       errorToastMessage({
-        title: res.message,
+        title: res.message ?? 'Error Occurred, please try again',
       });
       return;
     }
@@ -66,7 +66,7 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
     setIsLoading(false);
     if (res.error) {
       errorToastMessage({
-        title: res.message,
+        title: res.message ?? 'Error Occurred, please try again',
       });
       return;
     }
@@ -80,11 +80,11 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
     setIsLoading(false);
     if (res.error) {
       errorToastMessage({
-        title: res.message,
+        title: res.message ?? 'Error Occurred, please try again',
       });
       return;
     }
-    successToastMessage({title: 'Data fetched'});
+    successToastMessage({ title: 'Data fetched' });
     if (res) {
       setSandboxDataFromServer(res);
     }
@@ -97,7 +97,7 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
     setIsLoading(false);
     if (res.error) {
       errorToastMessage({
-        title: res.message,
+        title: res.message ?? 'Error Occurred, please try again',
       });
       return;
     }
@@ -111,7 +111,7 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
     setIsLoading(false);
     if (res.error) {
       errorToastMessage({
-        title: res.message,
+        title: res.message ?? 'Error Occurred, please try again',
       });
       return;
     }
@@ -125,7 +125,7 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
     setIsLoading(false);
     if (res.error) {
       errorToastMessage({
-        title: res.message,
+        title: res.message ?? 'Error Occurred, please try again',
       });
       return;
     }
@@ -139,7 +139,7 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
     setIsLoading(false);
     if (res.error) {
       errorToastMessage({
-        title: res.message,
+        title: res.message ?? 'Error Occurred, please try again',
       });
       return;
     }
@@ -153,7 +153,7 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
     setIsLoading(false);
     if (res.error) {
       errorToastMessage({
-        title: res.message,
+        title: res.message ?? 'Error Occurred, please try again',
       });
       return;
     }
@@ -162,7 +162,7 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
 
   useEffect(() => {
     setSandboxDataFromServer(sandboxTableList);
-  }, [sandboxTableList])
+  }, [sandboxTableList]);
 
   return (
     <Box bg='white' border='1px solid' borderColor='gray.300' w='full'>
@@ -176,7 +176,10 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
             </Text>
             <Text>Deleted: {realmData.deletedSandboxes}</Text>
           </Flex>
-          <Flex>
+          <Flex display={{ base: 'none', md: 'flex' }}>
+            <IconButton mx='1' onClick={handleRefresh}>
+              <FiRefreshCw />
+            </IconButton>
             <Button colorScheme='twitter' mx='1' onClick={handleRestartAll}>
               Restart all
             </Button>
@@ -186,13 +189,27 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
             <Button colorScheme='twitter' mx='1' onClick={handleStopAll}>
               Stop all
             </Button>
+          </Flex>
+          <Flex display={{ md: 'none' }}>
             <IconButton mx='1' onClick={handleRefresh}>
               <FiRefreshCw />
             </IconButton>
+            <Menu>
+              <MenuButton>
+                <IconButton aria-label='dropdown'>
+                  <MdMoreVert />
+                </IconButton>
+              </MenuButton>
+              <MenuList>
+                <MenuItem onClick={handleRestartAll}>Restart all</MenuItem>
+                <MenuItem onClick={handleStartAll}>Start all</MenuItem>
+                <MenuItem onClick={handleStopAll}>Stop all</MenuItem>
+              </MenuList>
+            </Menu>
           </Flex>
         </Flex>
       </Box>
-      <Table my='1' overflowY='scroll' maxHeight='500px'>
+      <Table my='1' overflowY='scroll' maxHeight='500px' display='block'>
         <Thead>
           <Tr>
             {tableColumns.map((c, i) => (
@@ -204,7 +221,7 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
           {sandboxDataFromServer &&
             sandboxDataFromServer.map((s) => (
               <Tr key={s.id}>
-                <Td color="#1da1f2">
+                <Td color='#1da1f2'>
                   <Link to={`/sandbox/${s.id}`}>{s.id}</Link>
                 </Td>
                 <Td>{s.instance}</Td>
@@ -225,11 +242,35 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
                       <MdMoreVert />
                     </MenuButton>
                     <MenuList>
-                      <MenuItem onClick={()=>handleStart(s.id)}>Start</MenuItem>
-                      <MenuItem onClick={()=>handleStop(s.id)}>Stop</MenuItem>
-                      <MenuItem onClick={()=>handleRestart(s.id)}>Restart</MenuItem>
-                      <MenuItem onClick={()=>window.confirm('Are you sure you want to reset this sandbox (' + s.instance +  ')?') && handleReset(s.id) }>Reset</MenuItem>
-                      <MenuItem onClick={()=>window.confirm('Are you sure you want to delete this sandbox (' + s.instance +  ')?') && handleDelete(s.id) }>Delete</MenuItem>
+                      <MenuItem onClick={() => handleStart(s.id)}>
+                        Start
+                      </MenuItem>
+                      <MenuItem onClick={() => handleStop(s.id)}>Stop</MenuItem>
+                      <MenuItem onClick={() => handleRestart(s.id)}>
+                        Restart
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() =>
+                          window.confirm(
+                            'Are you sure you want to reset this sandbox (' +
+                              s.instance +
+                              ')?'
+                          ) && handleReset(s.id)
+                        }
+                      >
+                        Reset
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() =>
+                          window.confirm(
+                            'Are you sure you want to delete this sandbox (' +
+                              s.instance +
+                              ')?'
+                          ) && handleDelete(s.id)
+                        }
+                      >
+                        Delete
+                      </MenuItem>
                     </MenuList>
                   </Menu>
                 </Td>
@@ -237,7 +278,7 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
             ))}
         </Tbody>
       </Table>
-      {isLoading && <CenterSpinner/>}
+      {isLoading && <CenterSpinner />}
     </Box>
   );
 }

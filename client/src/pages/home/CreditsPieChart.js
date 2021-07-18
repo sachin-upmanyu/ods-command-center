@@ -22,13 +22,15 @@ function CreditsPieChart({ realmDataFromServer }) {
       setIsLoading(false);
       if (res.error) {
         errorToastMessage({
-          title: res.message,
+          title: res.message ?? 'Error Occurred, please try again',
         });
         return;
       }
       if (res.creditList && res.creditList.total_credits) {
-        setMinutesUp(res.returnData.minutesUp/res.creditList.total_credits);
-        setMinutesDown(0.3*res.returnData.minutesDown/res.creditList.total_credits);
+        setMinutesUp(res.returnData.minutesUp / res.creditList.total_credits);
+        setMinutesDown(
+          (0.3 * res.returnData.minutesDown) / res.creditList.total_credits
+        );
       } else {
         setMinutesUp(0);
         setMinutesDown(0);
@@ -38,7 +40,7 @@ function CreditsPieChart({ realmDataFromServer }) {
         errorToastMessage({
           title: 'Credit Consumption Alert',
           description: 'Please add credit',
-          duration: null
+          duration: null,
         });
       }
       setIsShowChart(true);
@@ -55,42 +57,54 @@ function CreditsPieChart({ realmDataFromServer }) {
   });
 
   return (
-    <Box bg='white' border='1px solid' borderColor='gray.300' p='4' w='45%'>
+    <Box bg='white' border='1px solid' borderColor='gray.300' p='4' w='half'>
       <Heading fontSize='lg'>Sandbox Statistics</Heading>
       <Box mt='50px'>
         {(isShowChart && (
           <>
-          <PieChart
-            animation
-            animationDuration={500}
-            animationEasing="ease-out"
-            center={[50, 50]}
-            data={[
-              { title: (minutesDown*100).toFixed(2)+'%', value: minutesDown*100, color: '#E38627' },
-              { title: (minutesUp*100).toFixed(2)+'%', value: minutesUp*100, color: '#C13C37' },
-              { title: creditsRemaining.toFixed(2)+'%', value: creditsRemaining, color: '#6A2135' },
-            ]}
-            labelPosition={50}
-            lengthAngle={360}
-            lineWidth={15}
-            paddingAngle={0}
-            radius={50}
-            rounded
-            startAngle={0}
-            viewBoxSize={[100, 100]}
-          />
-          <Flex>
-            <Box h="5" w="5" bg="#E38627" rounded="full"></Box>
-            <Text>Mins Down</Text>
-          </Flex>
-          <Flex>
-            <Box h="5" w="5" bg="#C13C37" rounded="full"></Box>
-            <Text>Mins Up</Text>
-          </Flex>
-          <Flex>
-            <Box h="5" w="5" bg="#6A2135" rounded="full"></Box>
-            <Text>Mins Remaining</Text>
-          </Flex>
+            <PieChart
+              animation
+              animationDuration={500}
+              animationEasing='ease-out'
+              center={[50, 50]}
+              data={[
+                {
+                  title: (minutesDown * 100).toFixed(2) + '%',
+                  value: minutesDown * 100,
+                  color: '#E38627',
+                },
+                {
+                  title: (minutesUp * 100).toFixed(2) + '%',
+                  value: minutesUp * 100,
+                  color: '#C13C37',
+                },
+                {
+                  title: creditsRemaining.toFixed(2) + '%',
+                  value: creditsRemaining,
+                  color: '#6A2135',
+                },
+              ]}
+              labelPosition={50}
+              lengthAngle={360}
+              lineWidth={15}
+              paddingAngle={0}
+              radius={50}
+              rounded
+              startAngle={0}
+              viewBoxSize={[100, 100]}
+            />
+            <Flex>
+              <Box h='5' w='5' bg='#E38627' rounded='full'></Box>
+              <Text>Mins Down</Text>
+            </Flex>
+            <Flex>
+              <Box h='5' w='5' bg='#C13C37' rounded='full'></Box>
+              <Text>Mins Up</Text>
+            </Flex>
+            <Flex>
+              <Box h='5' w='5' bg='#6A2135' rounded='full'></Box>
+              <Text>Mins Remaining</Text>
+            </Flex>
           </>
         )) || <Text>No Credit History</Text>}
       </Box>

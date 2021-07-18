@@ -34,7 +34,7 @@ function CreditHistory({ realmId }) {
       setIsLoading(false);
       if (res.error) {
         errorToastMessage({
-          title: res.message,
+          title: res.message ?? 'Error Occurred, please try again',
         });
         return;
       }
@@ -57,7 +57,7 @@ function CreditHistory({ realmId }) {
     setIsLoading(false);
     if (res.error) {
       errorToastMessage({
-        title: res.message,
+        title: res.message ?? 'Error Occurred, please try again',
       });
       return;
     }
@@ -71,14 +71,14 @@ function CreditHistory({ realmId }) {
   }, [realmId]);
 
   return (
-    <Box bg='white' border='1px solid' borderColor='gray.300' w='full' m='2'>
+    <Box bg='white' border='1px solid' borderColor='gray.300' w='full'>
       <Flex justifyContent='space-between' alignItems='center' p='4'>
         <Heading size='lg'>Credit History</Heading>
         <Button colorScheme='twitter' mx='1' px='10' onClick={toggleDialog}>
           Add
         </Button>
       </Flex>
-      <Table my='1'>
+      <Table my='1' overflowY='scroll' maxHeight='500px' display='block'>
         <Thead>
           <Tr>
             {creditHistoryTableColumns.map((c, i) => (
@@ -98,7 +98,9 @@ function CreditHistory({ realmId }) {
                   day: '2-digit',
                 }).format(new Date(c.purchaseDate))}
               </Td>
-              <Td>{c.autoRenewal=== 1 || c.autoRenewal === '1' ? 'Yes' : 'No'}</Td>
+              <Td>
+                {c.autoRenewal === 1 || c.autoRenewal === '1' ? 'Yes' : 'No'}
+              </Td>
               <Td fontSize='2rem' color='red.500'>
                 <IconButton
                   variant='ghost'
