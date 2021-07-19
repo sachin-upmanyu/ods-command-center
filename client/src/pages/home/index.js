@@ -1,4 +1,4 @@
-import { Grid, Flex, Heading } from '@chakra-ui/react';
+import { Grid, Flex, Heading, Box } from '@chakra-ui/react';
 
 import React, { useState, useContext } from 'react';
 import { Helmet } from 'react-helmet';
@@ -120,7 +120,7 @@ function Home() {
     >
       <Helmet>Home</Helmet>
       {(selectedRealm && (
-        <>
+        <Box>
           <Heading>{selectedRealm.id}</Heading>
           <Flex flexWrap='wrap'>
             <Grid
@@ -178,7 +178,7 @@ function Home() {
                 lg: '2fr 1fr',
                 xl: '3fr 1fr',
               }}
-              gap='2'
+              gap='4'
               p='2'
               w='100%'
             >
@@ -186,7 +186,7 @@ function Home() {
               <CreditsPieChart realmDataFromServer={selectedRealm} />
             </Grid>
           </Flex>
-        </>
+        </Box>
       )) || <Heading>No realms</Heading>}
       {isLoading && <CenterSpinner />}
     </HeaderWrapper>

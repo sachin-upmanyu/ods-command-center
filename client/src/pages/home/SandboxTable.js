@@ -161,7 +161,8 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
   }, [sandboxTableList]);
 
   return (
-    <Grid
+    <Flex
+      flexDir='column'
       bg='white'
       w='full'
       border='1px solid'
@@ -220,9 +221,11 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
       </Box>
       <Grid
         templateColumns='4fr 1fr 1fr 4fr 2fr 1fr'
-        gap='8'
+        templateRows='repeat(auto-fill, 50px)'
+        columnGap='4'
+        rowGap='2'
         placeItems='start'
-        px='2'
+        px='4'
         boxSizing='border-box'
         alignItems='center'
         minW='1000px'
@@ -291,7 +294,7 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
           ))}
       </Grid>
       {isLoading && <CenterSpinner />}
-    </Grid>
+    </Flex>
   );
 }
 

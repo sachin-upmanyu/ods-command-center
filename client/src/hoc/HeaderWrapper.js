@@ -24,7 +24,7 @@ function HeaderWrapper({ children, pageTitle, realms, handleSelect }) {
     }
   };
   return (
-    <Box bg='gray.50' minH='100vh'>
+    <Box bg='gray.50' minH='100vh' mb='10'>
       <Flex
         h='16'
         bg='blue.50'

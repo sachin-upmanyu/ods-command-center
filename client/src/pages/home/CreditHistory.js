@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import {
   Text,
-  Box,
   Heading,
   Flex,
   Button,
   IconButton,
   Grid,
-  Divider,
 } from '@chakra-ui/react';
 import { MdDelete } from 'react-icons/md';
 import { creditHistoryTableColumns } from '../../utils/sandboxes';
@@ -68,17 +66,18 @@ function CreditHistory({ realmId }) {
   }, [realmId]);
 
   return (
-    <Grid
+    <Flex
       bg='white'
       w='full'
       border='1px solid'
-      borderColor='gray.100'
+      borderColor='gray.300'
       overflow='auto'
-      my='1'
-      maxHeight='500px'
       minW='500px'
+      alignItems='top'
+      flexDir='column'
+      p='2'
     >
-      <Flex justifyContent='space-between' alignItems='center' p='4'>
+      <Flex justifyContent='space-between' alignItems='center' py='4'>
         <Heading size='lg'>Credit History</Heading>
         <Button colorScheme='twitter' mx='1' px='10' onClick={toggleDialog}>
           Add
@@ -86,9 +85,11 @@ function CreditHistory({ realmId }) {
       </Flex>
       <Grid
         templateColumns='1fr 2fr 2fr 1fr 1fr'
-        gap='4'
+        templateRows='repeat(auto-fill, 50px)'
+        columnGap='4'
+        rowGap='2'
         placeItems='start'
-        px='2'
+        px='4'
         boxSizing='border-box'
         alignItems='center'
         minW='500px'
@@ -132,7 +133,7 @@ function CreditHistory({ realmId }) {
         realmId={realmId}
       />
       {isLoading && <CenterSpinner />}
-    </Grid>
+    </Flex>
   );
 }
 
