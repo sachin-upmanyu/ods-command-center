@@ -172,16 +172,17 @@ function Home() {
               />
             </Flex>
             <Grid
-              templateColumns={{ base: 'repeat(1, 1fr)', lg: 'repeat(2,1fr)' }}
+              templateColumns={{
+                base: 'repeat(1, 1fr)',
+                md: 'repeat(2,1fr)',
+                lg: '2fr 1fr',
+                xl: '3fr 1fr',
+              }}
               gap='2'
               p='2'
               w='100%'
             >
-              {selectedRealm.id && (
-                <Flex w='100%' overflowX='auto'>
-                  <CreditHistory realmId={selectedRealm.id} />
-                </Flex>
-              )}
+              {selectedRealm.id && <CreditHistory realmId={selectedRealm.id} />}
               <CreditsPieChart realmDataFromServer={selectedRealm} />
             </Grid>
           </Flex>

@@ -1,16 +1,13 @@
 import React, { useState } from 'react';
 import {
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
+  Text,
   Box,
   Heading,
   Flex,
   Button,
   IconButton,
+  Grid,
+  Divider,
 } from '@chakra-ui/react';
 import { MdDelete } from 'react-icons/md';
 import { creditHistoryTableColumns } from '../../utils/sandboxes';
@@ -71,49 +68,63 @@ function CreditHistory({ realmId }) {
   }, [realmId]);
 
   return (
-    <Box bg='white' border='1px solid' borderColor='gray.300' w='full'>
+    <Grid
+      bg='white'
+      w='full'
+      border='1px solid'
+      borderColor='gray.100'
+      overflow='auto'
+      my='1'
+      maxHeight='500px'
+      minW='500px'
+    >
       <Flex justifyContent='space-between' alignItems='center' p='4'>
         <Heading size='lg'>Credit History</Heading>
         <Button colorScheme='twitter' mx='1' px='10' onClick={toggleDialog}>
           Add
         </Button>
       </Flex>
-      <Table my='1' overflowY='scroll' maxHeight='500px' display='block'>
-        <Thead>
-          <Tr>
-            {creditHistoryTableColumns.map((c, i) => (
-              <Th key={i}>{c}</Th>
-            ))}
-          </Tr>
-        </Thead>
-        <Tbody>
-          {credits.map((c, index) => (
-            <Tr key={index}>
-              <Td>{index + 1}</Td>
-              <Td>{c.credit}</Td>
-              <Td>
-                {new Intl.DateTimeFormat('en-US', {
-                  year: 'numeric',
-                  month: 'short',
-                  day: '2-digit',
-                }).format(new Date(c.purchaseDate))}
-              </Td>
-              <Td>
-                {c.autoRenewal === 1 || c.autoRenewal === '1' ? 'Yes' : 'No'}
-              </Td>
-              <Td fontSize='2rem' color='red.500'>
-                <IconButton
-                  variant='ghost'
-                  fontSize='2xl'
-                  onClick={() => deleteCredit(c)}
-                >
-                  <MdDelete />
-                </IconButton>
-              </Td>
-            </Tr>
-          ))}
-        </Tbody>
-      </Table>
+      <Grid
+        templateColumns='1fr 2fr 2fr 1fr 1fr'
+        gap='4'
+        placeItems='start'
+        px='2'
+        boxSizing='border-box'
+        alignItems='center'
+        minW='500px'
+        overflowY='auto'
+      >
+        {creditHistoryTableColumns.map((c, i) => (
+          <Heading key={i} size='sm' mt='2'>
+            {c}
+          </Heading>
+        ))}
+        {credits.map((c, index) => (
+          <React.Fragment key={index}>
+            <Text>{index + 1}</Text>
+            <Text>{c.credit}</Text>
+            <Text>
+              {new Intl.DateTimeFormat('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: '2-digit',
+              }).format(new Date(c.purchaseDate))}
+            </Text>
+            <Text>
+              {c.autoRenewal === 1 || c.autoRenewal === '1' ? 'Yes' : 'No'}
+            </Text>
+            <Text fontSize='2rem' color='red.500'>
+              <IconButton
+                variant='ghost'
+                fontSize='2xl'
+                onClick={() => deleteCredit(c)}
+              >
+                <MdDelete />
+              </IconButton>
+            </Text>
+          </React.Fragment>
+        ))}
+      </Grid>
       <CreditHistoryFormDialog
         isOpen={isOpen}
         submit={handleSubmit}
@@ -121,7 +132,7 @@ function CreditHistory({ realmId }) {
         realmId={realmId}
       />
       {isLoading && <CenterSpinner />}
-    </Box>
+    </Grid>
   );
 }
 
