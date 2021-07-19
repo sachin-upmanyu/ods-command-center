@@ -205,10 +205,14 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
               <FiRefreshCw />
             </IconButton>
             <Menu>
-              <MenuButton>
-                <IconButton aria-label='dropdown'>
-                  <MdMoreVert />
-                </IconButton>
+              <MenuButton
+                display='flex'
+                justifyContent='center'
+                colorScheme='gray'
+                as={Button}
+                px='3'
+              >
+                <MdMoreVert />
               </MenuButton>
               <MenuList>
                 <MenuItem onClick={handleRestartAll}>Restart all</MenuItem>
@@ -222,8 +226,7 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
       <Grid
         templateColumns='4fr 1fr 1fr 4fr 2fr 1fr'
         templateRows='repeat(auto-fill, 50px)'
-        columnGap='4'
-        rowGap='2'
+        gap='4'
         placeItems='start'
         px='4'
         boxSizing='border-box'
@@ -240,7 +243,7 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
 
         {sandboxDataFromServer &&
           sandboxDataFromServer.map((s) => (
-            <>
+            <React.Fragment key={s.id}>
               <Text color='#1da1f2'>
                 <Link to={`/sandbox/${s.id}`}>{s.id}</Link>
               </Text>
@@ -290,7 +293,7 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
                   </MenuItem>
                 </MenuList>
               </Menu>
-            </>
+            </React.Fragment>
           ))}
       </Grid>
       {isLoading && <CenterSpinner />}
