@@ -73,6 +73,7 @@ function CreditHistory({ realmId }) {
       borderColor='gray.300'
       overflow='auto'
       minW='500px'
+      maxH='500px'
       alignItems='top'
       flexDir='column'
       p='2'
@@ -93,7 +94,6 @@ function CreditHistory({ realmId }) {
         boxSizing='border-box'
         alignItems='center'
         minW='500px'
-        overflowY='auto'
       >
         {creditHistoryTableColumns.map((c, i) => (
           <Heading key={i} size='sm' mt='2'>
