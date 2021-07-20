@@ -24,7 +24,7 @@ function HeaderWrapper({ children, pageTitle, realms, handleSelect }) {
     }
   };
   return (
-    <Box bg='gray.50' minH='100vh' mb='10'>
+    <Box bg='gray.50' minH='100vh' h='100%'>
       <Flex
         h='16'
         bg='blue.50'
@@ -70,7 +70,7 @@ function HeaderWrapper({ children, pageTitle, realms, handleSelect }) {
           </Button>
         </Box>
       </Flex>
-      <Box py='8' px='4'>
+      <Box py='8' px='4' maxW='1920px' mx='auto' pb='10'>
         {children}
       </Box>
     </Box>

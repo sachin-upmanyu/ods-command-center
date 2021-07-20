@@ -11,7 +11,6 @@ import {
   MenuButton,
   MenuList,
   Grid,
-  Divider,
 } from '@chakra-ui/react';
 import { FiRefreshCw } from 'react-icons/fi';
 import { tableColumns } from '../../utils/sandboxes';
@@ -171,75 +170,76 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
       my='1'
       maxHeight='500px'
       minW='500px'
+      p='2'
     >
-      <Box p='4' w='full'>
-        <Heading size='lg'>Sandboxes</Heading>
-        <Flex justifyContent='space-between' alignItems='center' w='full'>
-          <Flex w='full'>
-            <Text mr='2'>Created: {realmData.createdSandboxes}</Text>
-            <Text mr='2'>
-              Active: {realmData.createdSandboxes - realmData.deletedSandboxes}
-            </Text>
-            <Text>Deleted: {realmData.deletedSandboxes}</Text>
-          </Flex>
-          <Flex
-            display={{ base: 'none', md: 'flex' }}
-            w='full'
-            justifyContent='flex-end'
-          >
-            <IconButton mx='1' onClick={handleRefresh}>
-              <FiRefreshCw />
-            </IconButton>
-            <Button colorScheme='twitter' mx='1' onClick={handleRestartAll}>
-              Restart all
-            </Button>
-            <Button colorScheme='twitter' mx='1' onClick={handleStartAll}>
-              Start all
-            </Button>
-            <Button colorScheme='twitter' mx='1' onClick={handleStopAll}>
-              Stop all
-            </Button>
-          </Flex>
-          <Flex display={{ base: 'flex', md: 'none' }}>
-            <IconButton mx='1' onClick={handleRefresh}>
-              <FiRefreshCw />
-            </IconButton>
-            <Menu>
-              <MenuButton
-                display='flex'
-                justifyContent='center'
-                colorScheme='gray'
-                as={Button}
-                px='3'
-              >
-                <MdMoreVert />
-              </MenuButton>
-              <MenuList>
-                <MenuItem onClick={handleRestartAll}>Restart all</MenuItem>
-                <MenuItem onClick={handleStartAll}>Start all</MenuItem>
-                <MenuItem onClick={handleStopAll}>Stop all</MenuItem>
-              </MenuList>
-            </Menu>
-          </Flex>
-        </Flex>
-      </Box>
       <Grid
         templateColumns='4fr 1fr 1fr 4fr 2fr 1fr'
-        templateRows='repeat(auto-fill, 50px)'
-        gap='4'
+        templateRows='repeat(auto-fill, 75px)'
+        columnGap='4'
+        rowGap='6'
         placeItems='start'
         px='4'
         boxSizing='border-box'
         alignItems='center'
         minW='1000px'
-        overflow='auto'
       >
+        <Box my='4' w='full' gridColumn='1/-1'>
+          <Heading size='lg'>Sandboxes</Heading>
+          <Flex justifyContent='space-between' alignItems='center' w='full'>
+            <Flex w='full'>
+              <Text mr='2'>Created: {realmData.createdSandboxes}</Text>
+              <Text mr='2'>
+                Active:{' '}
+                {realmData.createdSandboxes - realmData.deletedSandboxes}
+              </Text>
+              <Text>Deleted: {realmData.deletedSandboxes}</Text>
+            </Flex>
+            <Flex
+              display={{ base: 'none', md: 'flex' }}
+              w='full'
+              justifyContent='flex-end'
+            >
+              <IconButton mx='1' onClick={handleRefresh}>
+                <FiRefreshCw />
+              </IconButton>
+              <Button colorScheme='twitter' mx='1' onClick={handleRestartAll}>
+                Restart all
+              </Button>
+              <Button colorScheme='twitter' mx='1' onClick={handleStartAll}>
+                Start all
+              </Button>
+              <Button colorScheme='twitter' mx='1' onClick={handleStopAll}>
+                Stop all
+              </Button>
+            </Flex>
+            <Flex display={{ base: 'flex', md: 'none' }}>
+              <IconButton mx='1' onClick={handleRefresh}>
+                <FiRefreshCw />
+              </IconButton>
+              <Menu>
+                <MenuButton
+                  display='flex'
+                  justifyContent='center'
+                  colorScheme='gray'
+                  as={Button}
+                  px='3'
+                >
+                  <MdMoreVert />
+                </MenuButton>
+                <MenuList>
+                  <MenuItem onClick={handleRestartAll}>Restart all</MenuItem>
+                  <MenuItem onClick={handleStartAll}>Start all</MenuItem>
+                  <MenuItem onClick={handleStopAll}>Stop all</MenuItem>
+                </MenuList>
+              </Menu>
+            </Flex>
+          </Flex>
+        </Box>
         {tableColumns.map((c, i) => (
-          <Heading key={i} size='sm' mt='2'>
+          <Heading key={i} size='sm' mt='2' alignSelf='end'>
             {c}
           </Heading>
         ))}
-        <Divider gridColumn='1/-1' />
 
         {sandboxDataFromServer &&
           sandboxDataFromServer.map((s) => (
