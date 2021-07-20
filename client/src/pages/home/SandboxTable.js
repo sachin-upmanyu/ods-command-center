@@ -170,8 +170,10 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
         <Heading size='lg'>Sandboxes</Heading>
         <Flex justifyContent='space-between' alignItems='center'>
           <Flex>
-            <Text mr='2'>Created: {realmData.createdSandboxes - realmData.deletedSandboxes}</Text>
-            <Text mr='2'>Active: {realmData.createdSandboxes}</Text>
+            <Text mr='2'>Created: {realmData.createdSandboxes}</Text>
+            <Text mr='2'>
+              Active: {realmData.createdSandboxes - realmData.deletedSandboxes}
+            </Text>
             <Text>Deleted: {realmData.deletedSandboxes}</Text>
           </Flex>
           <Flex>
