@@ -8,14 +8,16 @@ import {
   MenuItem,
   MenuList,
 } from '@chakra-ui/react';
-import React from 'react';
+import React, { useContext } from 'react';
 import { AiFillCaretDown } from 'react-icons/ai';
 import { Link, useHistory } from 'react-router-dom';
 import { useAxios } from '../hooks/axiosHook';
+import { RealmContext } from '../context/RealmContext';
 
 function HeaderWrapper({ children, pageTitle, realms, handleSelect }) {
   const { getRequest } = useAxios();
   const history = useHistory();
+  const [selectedRealm] = useContext(RealmContext);
 
   const handleLogout = () => {
     const res = getRequest('/logout');
@@ -48,7 +50,7 @@ function HeaderWrapper({ children, pageTitle, realms, handleSelect }) {
                 mx='4'
                 rightIcon={<AiFillCaretDown />}
               >
-                Select Realm
+                Realm : {selectedRealm && selectedRealm.id}
               </MenuButton>
               <MenuList>
                 {realms &&

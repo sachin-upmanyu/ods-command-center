@@ -188,7 +188,7 @@ program
     .action(function(options) {
         var realm = ( options.realm ? options.realm : null );
         var asJson = ( options.json ? options.json : false );
-        var topic = ( options.showUsage ? 'usage' : null );
+        var topic = ( options.showUsage ? 'usage' : 'all' );
         require('./lib/sandbox').cli.realm.list(realm, topic, asJson);
     }).on('--help', function() {
         console.log('');

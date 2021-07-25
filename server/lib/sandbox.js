@@ -247,6 +247,8 @@ function getRealm(realmID, topic, callback) {
         // for retrieving usage data, always retrieve full usage
         if ( topic === 'usage' ) {
             extension += '?from=2019-01-01';
+        } else if ( topic === 'all') {
+            extension = '/configuration'
         }
     }
     ocapi.retryableCall('GET', API_BASE + '/realms/' + realmID + extension, function(err, res) {
