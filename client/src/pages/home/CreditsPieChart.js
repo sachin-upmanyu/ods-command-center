@@ -58,7 +58,7 @@ function CreditsPieChart({ realmDataFromServer }) {
 
   return (
     <Box bg='white' border='1px solid' borderColor='gray.300' p='4' w='half'>
-      <Heading fontSize='lg'>Sandbox Statistics</Heading>
+      <Heading fontSize='lg'>Realm Statistics</Heading>
       <Box mt='50px'>
         {(isShowChart && (
           <>
