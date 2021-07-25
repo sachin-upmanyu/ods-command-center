@@ -203,7 +203,6 @@ router.get('/sandbox/realms/list', async (req, res, next) => {
     child.stdout.on('data', (data) => {
       returnData += data.toString();
     });
-
     let error = false;
     child.stderr.on('data', (data) => {
       error = true;
@@ -243,6 +242,48 @@ router.get('/sandbox/realms/list/:realmId/:topic', async (req, res, next) => {
       'sandbox:realm:list',
       `--realm=${realmId}`,
       '--show-usage',
+      '-j',
+    ]);
+    var returnData = '';
+
+    child.stdout.on('data', (data) => {
+      returnData += data.toString();
+    });
+
+    let error = false;
+    child.stderr.on('data', (data) => {
+      error = true;
+    });
+
+    child.on('close', (code) => {
+      if (code || error) {
+        next();
+        return;
+      }
+      res.status(200).json(JSON.parse(returnData));
+    });
+
+    child.on('error', (err) => {
+      res.status(400).json(err);
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+
+/**
+ * Get realm configuration
+ */
+  router.get('/sandbox/realm/config/:realmId', async (req, res, next) => {
+  try {
+    const { realmId} = req.params;
+
+    const filePath = path.resolve(process.cwd(), 'cli.js');
+    const child = spawn('node', [
+      filePath,
+      'sandbox:realm:list',
+      `--realm=${realmId}`,
       '-j',
     ]);
     var returnData = '';

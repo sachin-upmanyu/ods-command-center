@@ -7,6 +7,7 @@ import HeaderWrapper from '../../hoc/HeaderWrapper';
 import { AiOutlineCodeSandbox } from 'react-icons/ai';
 import { useEffect } from 'react';
 import SandboxTable from './SandboxTable';
+import SchedulerDetails from './SchedulerDetails';
 import CreditsPieChart from './CreditsPieChart';
 import CreditHistory from './CreditHistory';
 import { MdArrowDownward, MdArrowUpward } from 'react-icons/md';
@@ -21,6 +22,7 @@ function Home() {
   const [selectedRealmSandboxes, setSelectedRealmSandboxes] = useState([]);
   const [selectedRealm, setSelectedRealm] = useContext(RealmContext);
   const [realmsList, setRealmsList] = useState([]);
+  const [realmConfig, setRealmConfig] = useState([]);
   const { getRequest } = useAxios();
   const { errorToastMessage } = useToastMessage();
   const [isLoading, setIsLoading] = useState(false);
@@ -42,8 +44,34 @@ function Home() {
     setRealmsList(res);
   };
 
+  const getRealmConfig = async (realmId) => {
+    /*
+      Add get request to fetch data of one realm using realmId
+      fetch remaining credits for that realm
+      fetch sandboxes of that realm
+    */
+    setIsLoading(true);
+    const realmConfigData = await getRequest(
+      `/sandbox/realm/config/${realmId}`
+    );
+console.log(realmConfigData);
+    if (realmConfigData.error) {
+      errorToastMessage({
+        title: realmConfigData.message ?? 'Error Occurred, please try again',
+      });
+      setIsLoading(false);
+      return;
+    }
+// console.log(realmConfigData);
+    // Change this call to something that sets the data not only id
+    // Need of the selected realm data api
+    setRealmConfig(realmConfigData);
+  };
+
+
+
   const selectRealm = async (realmId) => {
-    /* 
+    /*
       Add get request to fetch data of one realm using realmId
       fetch remaining credits for that realm
       fetch sandboxes of that realm
@@ -107,6 +135,7 @@ function Home() {
         setSelectedRealmSandboxes(x);
       } else {
         selectRealm(realmsList[0]);
+        getRealmConfig(realmsList[0]);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -164,6 +193,13 @@ function Home() {
                 color='red'
               />
             </Grid>
+            <Flex w='100%' p='2'>
+              <SchedulerDetails
+                sandboxTableList={selectedRealmSandboxes}
+                realmId={selectedRealm.id}
+                realmData={realmConfig}
+              />
+            </Flex>
             <Flex w='100%' p='2'>
               <SandboxTable
                 sandboxTableList={selectedRealmSandboxes}
