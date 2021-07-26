@@ -313,6 +313,53 @@ router.get('/sandbox/realms/list/:realmId/:topic', async (req, res, next) => {
   }
 });
 
+
+// update realm configuration
+router.patch('/sandbox/realm/config/update', async (req, res, next) => {
+  try {
+    const filePath = path.resolve(process.cwd(), 'cli.js');
+    const { realmId, startScheduler, stopScheduler, maxSandboxTtl, defaultSandboxTtl } = req.body;
+    console.log(realmId, startScheduler, stopScheduler);
+    // res.status(200).json({ login: true, token: Math.random(50000) });
+
+    const child = spawn('node', [
+      filePath,
+      'sandbox:realm:update',
+      `--realm=${realmId}`,
+      `--max-sandbox-ttl=${maxSandboxTtl}`,
+      `--default-sandbox-ttl=${defaultSandboxTtl}`,
+      '-j',
+    ]);
+
+    let returnData = '';
+
+    child.stdout.on('data', (data) => {
+      returnData += data.toString();
+    });
+
+    let error = false;
+    child.stderr.on('data', (data) => {
+      error = true;
+    });
+
+    child.on('close', (code) => {
+      if (code || error) {
+        next();
+        return;
+      }
+      // res.status(200).json(JSON.parse(returnData));
+      res.status(200).send(returnData);
+    });
+
+    child.on('error', (err) => {
+      res.status(400).json(err);
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+
 // sandbox:list lands here
 router.get('/sandbox/list', async (req, res, next) => {
   try {

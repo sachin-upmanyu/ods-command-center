@@ -54,7 +54,7 @@ function Home() {
     const realmConfigData = await getRequest(
       `/sandbox/realm/config/${realmId}`
     );
-console.log(realmConfigData);
+// console.log(realmConfigData);
     if (realmConfigData.error) {
       errorToastMessage({
         title: realmConfigData.message ?? 'Error Occurred, please try again',
@@ -150,7 +150,6 @@ console.log(realmConfigData);
       <Helmet>Home</Helmet>
       {(selectedRealm && (
         <Box>
-          <Heading>{selectedRealm.id}</Heading>
           <Flex flexWrap='wrap'>
             <Grid
               templateColumns={{
@@ -193,7 +192,7 @@ console.log(realmConfigData);
                 color='red'
               />
             </Grid>
-            <Flex w='100%' p='2'>
+            <Flex w='100%' p='2' h='175px'>
               <SchedulerDetails
                 sandboxTableList={selectedRealmSandboxes}
                 realmId={selectedRealm.id}
