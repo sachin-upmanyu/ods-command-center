@@ -19,19 +19,13 @@ import CenterSpinner from '../centerSpinner/CenterSpinner';
 const initialState = {
   start_time: '',
   stop_time: '',
-  monday: 0,
-  tuesday: 0,
-  wednesday: 0,
-  thursday: 0,
-  friday: 0,
-  saturday: 0,
-  sunday: 0,
+  weekdays: []
 };
 
 function SchedulerFormDialog({ isOpen, handleClose, submit, realmId }) {
   const [state, setState] = useState(initialState);
-  const { postRequest } = useAxios();
-  const { errorToastMessage } = useToastMessage();
+  const { patchRequest } = useAxios();
+  const { errorToastMessage, successToastMessage } = useToastMessage();
   const [isLoading, setIsLoading] = useState(false);
 
   const onClose = () => {
@@ -48,12 +42,48 @@ function SchedulerFormDialog({ isOpen, handleClose, submit, realmId }) {
     const { checked, name } = event.target;
     setState((s) => ({ ...s, [name]: checked }));
   };
+  const daysOptions = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map((cur, ind) => {
+    return (
+      <FormControl id={ind}>
+        <Checkbox
+          name={cur}
+          value={cur}
+          onChange={handleChangeCheckbox}
+        >
+          {cur}
+        </Checkbox>
+      </FormControl>
+    )
+  })
 
   const handleSubmit = async (event) => {
     // Post request
     event.preventDefault();
     setIsLoading(true);
-    const res = await postRequest(`/credit/add/`, { ...state, realmId });
+
+    let weekdays = [];
+    if (state.Monday) weekdays.push('MONDAY')
+    if (state.Tuesday) weekdays.push('TUESDAY')
+    if (state.Wednesday) weekdays.push('WEDNESDAY')
+    if (state.Thursday) weekdays.push('THURSDAY')
+    if (state.Friday) weekdays.push('FRIDAY')
+    if (state.Saturday) weekdays.push('SATURDAY')
+    if (state.Sunday) weekdays.push('SUNDAY')
+
+    let formArr = {
+      "realmId":realmId,
+      "schedule": {
+        "stopScheduler": {
+          "weekdays": weekdays,
+          "time": state.stop_time
+        },
+        "startScheduler": {
+          "weekdays": weekdays,
+          "time": state.start_time
+        }
+      }
+    }
+    const res = await patchRequest(`/sandbox/realm/config/update`, { formArr });
     setIsLoading(false);
     if (res.error) {
       errorToastMessage({
@@ -61,9 +91,16 @@ function SchedulerFormDialog({ isOpen, handleClose, submit, realmId }) {
       });
       return;
     }
+    handleClose();
+    successToastMessage({ title: 'Schedule updated successfully' });
+
     // close dialog
-    submit();
-    window.location.reload();
+    try {
+      submit();
+    } catch(e) {
+      console.log(e);
+    }
+    // window.location.reload();
   };
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -74,7 +111,7 @@ function SchedulerFormDialog({ isOpen, handleClose, submit, realmId }) {
           <form onSubmit={handleSubmit}>
             <Grid gap='3' my='2'>
               <FormControl id='start_time'>
-                <FormLabel>Start Time</FormLabel>
+                <FormLabel>Start Time (in GMT)</FormLabel>
                 <Input
                   name='start_time'
                   value={state.start_time}
@@ -84,7 +121,7 @@ function SchedulerFormDialog({ isOpen, handleClose, submit, realmId }) {
                 />
               </FormControl>
               <FormControl id='stop_time'>
-                <FormLabel>Stop Time</FormLabel>
+                <FormLabel>Stop Time (in GMT)</FormLabel>
                 <Input
                   name='stop_time'
                   value={state.stop_time}
@@ -94,69 +131,7 @@ function SchedulerFormDialog({ isOpen, handleClose, submit, realmId }) {
                 />
               </FormControl>
               <FormLabel>Days</FormLabel>
-              <FormControl id='monday'>
-                <Checkbox
-                  name='monday'
-                  value={state.monday}
-                  onChange={handleChangeCheckbox}
-                >
-                  Monday
-                </Checkbox>
-              </FormControl>
-              <FormControl id='tuesday'>
-                <Checkbox
-                  name='tuesday'
-                  value={state.tuesday}
-                  onChange={handleChangeCheckbox}
-                >
-                  Tuesday
-                </Checkbox>
-              </FormControl>
-              <FormControl id='wednesday'>
-                <Checkbox
-                  name='wednesday'
-                  value={state.wednesday}
-                  onChange={handleChangeCheckbox}
-                >
-                  Wednesday
-                </Checkbox>
-              </FormControl>
-              <FormControl id='thursday'>
-                <Checkbox
-                  name='thursday'
-                  value={state.thursday}
-                  onChange={handleChangeCheckbox}
-                >
-                  Thursday
-                </Checkbox>
-              </FormControl>
-              <FormControl id='friday'>
-                <Checkbox
-                  name='friday'
-                  value={state.friday}
-                  onChange={handleChangeCheckbox}
-                >
-                  Friday
-                </Checkbox>
-              </FormControl>
-              <FormControl id='saturday'>
-                <Checkbox
-                  name='saturday'
-                  value={state.saturday}
-                  onChange={handleChangeCheckbox}
-                >
-                  Saturday
-                </Checkbox>
-              </FormControl>
-              <FormControl id='sunday'>
-                <Checkbox
-                  name='sunday'
-                  value={state.sunday}
-                  onChange={handleChangeCheckbox}
-                >
-                  Sunday
-                </Checkbox>
-              </FormControl>
+              {daysOptions}
               <Grid templateColumns='repeat(2, 1fr)' gap='2'>
                 <Button
                   onClick={handleClose}

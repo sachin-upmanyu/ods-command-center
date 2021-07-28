@@ -284,6 +284,7 @@ router.get('/sandbox/realms/list/:realmId/:topic', async (req, res, next) => {
       filePath,
       'sandbox:realm:list',
       `--realm=${realmId}`,
+      `--show-config`,
       '-j',
     ]);
     var returnData = '';
@@ -318,16 +319,17 @@ router.get('/sandbox/realms/list/:realmId/:topic', async (req, res, next) => {
 router.patch('/sandbox/realm/config/update', async (req, res, next) => {
   try {
     const filePath = path.resolve(process.cwd(), 'cli.js');
-    const { realmId, startScheduler, stopScheduler, maxSandboxTtl, defaultSandboxTtl } = req.body;
-    console.log(realmId, startScheduler, stopScheduler);
+    const { formArr, maxSandboxTtl, defaultSandboxTtl } = req.body;
     // res.status(200).json({ login: true, token: Math.random(50000) });
-
+    let schedule = formArr.schedule;
+    let realmId = formArr.realmId;
     const child = spawn('node', [
       filePath,
       'sandbox:realm:update',
       `--realm=${realmId}`,
       `--max-sandbox-ttl=${maxSandboxTtl}`,
       `--default-sandbox-ttl=${defaultSandboxTtl}`,
+      `--schedule=${JSON.stringify(schedule)}`,
       '-j',
     ]);
 

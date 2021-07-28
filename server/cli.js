@@ -185,12 +185,14 @@ program
     .description('List realms eligible to manage sandboxes for')
     .option('-r, --realm <realm>','Realm to get details for')
     .option('--show-usage', 'Whether to return detailed usage data')
+    .option('--show-config showConfig', 'Whether to return configuration usage data')
     .option('-j, --json','Formats the output in json')
     .action(function(options) {
         var realm = ( options.realm ? options.realm : null );
         var asJson = ( options.json ? options.json : false );
         var topic = ( options.showUsage ? 'usage' : null );
-        require('./lib/sandbox').cli.realm.list(realm, topic, asJson);
+        var configData = ( options.showConfig ? 'all' : null );
+        require('./lib/sandbox').cli.realm.list(realm, topic, configData, asJson);
     }).on('--help', function() {
         console.log('');
         console.log('  Details:');

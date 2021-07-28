@@ -14,7 +14,8 @@
     "test:functional:cli": "bin/test-cli.sh",
     "dist": "pkg . --out-path dist/",
     "snyk-protect": "snyk protect",
-    "prepare": "npm run snyk-protect"
+    "prepare": "npm run snyk-protect",
+    "start": "nodemon src/index.js"
   },
   "repository": {
     "type": "git",
@@ -40,7 +41,14 @@
     "request": "^2.88.0",
     "request-debug": "^0.2.0",
     "table": "^5.0.2",
-    "snyk": "^1.630.0"
+    "snyk": "^1.630.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "morgan": "^1.10.0",
+    "nodemailer": "^6.6.0",
+    "sequelize": "^6.6.2",
+    "sequelize-cli": "^6.2.0",
+    "sqlite3": "^5.0.2"
   },
   "devDependencies": {
     "archiver": "^5.0.0",
@@ -56,7 +64,8 @@
     "node-sha1": "^1.0.1",
     "pkg": "^4.3.4",
     "proxyquire": "^2.1.0",
-    "sinon": "^7.2.2"
+    "sinon": "^7.2.2",
+    "nodemon": "^2.0.4"
   },
   "snyk": true
 }

@@ -275,7 +275,7 @@ function getRealms(callback) {
  * @param {String} topic the topic to retrieve details about
  * @param {Function} callback the callback to execute, the error and the realm are available as arguments to the callback function
  */
-function getRealm(realmID, topic, callback) {
+function getRealm(realmID, topic, isConfig, callback) {
     // build the request options
     // use some default expansions
     var extension = '?expand=configuration,usage';
@@ -286,6 +286,9 @@ function getRealm(realmID, topic, callback) {
         if ( topic === 'usage' ) {
             extension += '?from=2019-01-01';
         }
+    }
+    if (isConfig === 'all') {
+        extension = '/configuration';
     }
     ocapi.retryableCall('GET', API_BASE + '/realms/' + realmID + extension, function(err, res) {
         if ( err ) {
@@ -323,17 +326,21 @@ function updateRealm(realmID, maxSandboxTTL, defaultSandboxTTL, schedule, callba
 
     // TODO set schedule here
     if (schedule) {
-      schedule = { startScheduler : {}, stopScheduler : {} };
+        schedule = JSON.parse(schedule);
+    //   schedule = { startScheduler : {}, stopScheduler : {} };
+    //   schedule['startScheduler']['time'] = "11:00:00+05:30";
+    //   schedule['startScheduler']['weekdays'] = ["MONDAY","TUESDAY","WEDNESDAY"];
+    //   schedule['stopScheduler']['time'] = "21:00:00+05:30";
+    //   schedule['stopScheduler']['weekdays'] = ["MONDAY","TUESDAY","WEDNESDAY"];
 
-      schedule['startScheduler']['time'] = "11:00:00+05:30";
-      schedule['startScheduler']['weekdays'] = ["MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY", "SATURDAY", "SUNDAY"];
-      schedule['stopScheduler']['time'] = "21:00:00+05:30";
-      schedule['stopScheduler']['weekdays'] = ["MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY", "SATURDAY", "SUNDAY"];
+      schedule['startScheduler']['time'] = schedule.startScheduler.time ? schedule.startScheduler.time : null;
+      schedule['startScheduler']['weekdays'] = schedule.startScheduler.weekdays ? schedule.startScheduler.weekdays : null;
+      schedule['stopScheduler']['time'] = schedule.stopScheduler.time ? schedule.stopScheduler.time : null;
+      schedule['stopScheduler']['weekdays'] = schedule.stopScheduler.weekdays ? schedule.stopScheduler.weekdays : null;
 
       options['body']['sandbox']['stopScheduler'] = schedule['stopScheduler'] ? schedule['stopScheduler'] : null;
       options['body']['sandbox']['startScheduler'] = schedule['startScheduler'] ? schedule['startScheduler'] : null;
     }
-
     ocapi.retryableCall('PATCH', options, function(err, res) {
         var errback = captureCommonErrors(err, res);
         if ( !errback ) {
@@ -785,10 +792,10 @@ module.exports.cli = {
          * @param {Boolean} asJson optional flag to force output in json, false by default
          * @param {String} sortBy optional field to sort the list by
          */
-        list : function(realm, topic, asJson, sortBy) {
+        list : function(realm, topic, isConfig, asJson, sortBy) {
             // get details of a single realm if realm id was passed
             if ( typeof(realm) !== 'undefined' && realm !== null ) {
-                getRealm(realm, topic, function (err, realm) {
+                getRealm(realm, topic, isConfig, function (err, realm) {
                     if (err) {
                         if (asJson) {
                             console.json({error: err.message});
@@ -846,7 +853,7 @@ module.exports.cli = {
          */
         update : function(realm, maxSandboxTTL, defaultSandboxTTL, schedule, asJson) {
             // lookup realm to update
-            getRealm(realm, null, function (err, realm) {
+            getRealm(realm, null, null, function (err, realm) {
                 if (err) {
                     // error
                     console.error(err.message);
