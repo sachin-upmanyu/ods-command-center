@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Text,
   Box,
@@ -11,20 +11,26 @@ import {
   MenuButton,
   MenuList,
   Grid,
-} from '@chakra-ui/react';
-import { FiRefreshCw } from 'react-icons/fi';
-import { tableColumns } from '../../utils/sandboxes';
-import { MdMoreVert } from 'react-icons/md';
-import { Link } from 'react-router-dom';
-import { useAxios } from '../../hooks/axiosHook';
-import { useToastMessage } from '../../hooks/toastHook';
-import CenterSpinner from '../../components/centerSpinner/CenterSpinner';
+} from "@chakra-ui/react";
+import { FiRefreshCw } from "react-icons/fi";
+import { tableColumns } from "../../utils/sandboxes";
+import { MdCheck, MdClose, MdMoreVert } from "react-icons/md";
+import { Link } from "react-router-dom";
+import { useAxios } from "../../hooks/axiosHook";
+import { useToastMessage } from "../../hooks/toastHook";
+import CenterSpinner from "../../components/centerSpinner/CenterSpinner";
+import SandBoxFormDialog from "../../components/SandBox/SandBoxFormDialog";
 
-function SandboxTable({ sandboxTableList, realmId, realmData }) {
+function SandboxTable({ sandboxTableList, realmId, realmData, handleSandBoxAdd }) {
   const [isLoading, setIsLoading] = useState(false);
   const { getRequest } = useAxios();
   const { errorToastMessage, successToastMessage } = useToastMessage();
   const [sandboxDataFromServer, setSandboxDataFromServer] = useState([]);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const toggleDialog = () => {
+    setIsOpen((o) => !o);
+  };
 
   const handleStartAll = async () => {
     setIsLoading(true);
@@ -33,7 +39,7 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
     setIsLoading(false);
     if (res.error) {
       errorToastMessage({
-        title: res.message ?? 'Error Occurred, please try again',
+        title: res.message ?? "Error Occurred, please try again",
       });
       return;
     }
@@ -47,7 +53,7 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
     setIsLoading(false);
     if (res.error) {
       errorToastMessage({
-        title: res.message ?? 'Error Occurred, please try again',
+        title: res.message ?? "Error Occurred, please try again",
       });
       return;
     }
@@ -61,7 +67,7 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
     setIsLoading(false);
     if (res.error) {
       errorToastMessage({
-        title: res.message ?? 'Error Occurred, please try again',
+        title: res.message ?? "Error Occurred, please try again",
       });
       return;
     }
@@ -75,11 +81,11 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
     setIsLoading(false);
     if (res.error) {
       errorToastMessage({
-        title: res.message ?? 'Error Occurred, please try again',
+        title: res.message ?? "Error Occurred, please try again",
       });
       return;
     }
-    successToastMessage({ title: 'Data fetched' });
+    successToastMessage({ title: "Data fetched" });
     if (res) {
       setSandboxDataFromServer(res);
     }
@@ -92,7 +98,7 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
     setIsLoading(false);
     if (res.error) {
       errorToastMessage({
-        title: res.message ?? 'Error Occurred, please try again',
+        title: res.message ?? "Error Occurred, please try again",
       });
       return;
     }
@@ -106,7 +112,7 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
     setIsLoading(false);
     if (res.error) {
       errorToastMessage({
-        title: res.message ?? 'Error Occurred, please try again',
+        title: res.message ?? "Error Occurred, please try again",
       });
       return;
     }
@@ -120,7 +126,7 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
     setIsLoading(false);
     if (res.error) {
       errorToastMessage({
-        title: res.message ?? 'Error Occurred, please try again',
+        title: res.message ?? "Error Occurred, please try again",
       });
       return;
     }
@@ -134,10 +140,11 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
     setIsLoading(false);
     if (res.error) {
       errorToastMessage({
-        title: res.message ?? 'Error Occurred, please try again',
+        title: res.message ?? "Error Occurred, please try again",
       });
       return;
     }
+    successToastMessage({ title: `SandBox ${sandboxId} has been reset successfully` });
     window.location.reload();
   };
 
@@ -148,11 +155,17 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
     setIsLoading(false);
     if (res.error) {
       errorToastMessage({
-        title: res.message ?? 'Error Occurred, please try again',
+        title: res.message ?? "Error Occurred, please try again",
       });
       return;
     }
+    successToastMessage({ title: `SandBox ${sandboxId} has been deleted successfully` });
     window.location.reload();
+  };
+
+  const handleUpdate = (createdSandBox) => {
+    handleSandBoxAdd(createdSandBox);
+    toggleDialog();
   };
 
   useEffect(() => {
@@ -161,68 +174,71 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
 
   return (
     <Flex
-      flexDir='column'
-      bg='white'
-      w='full'
-      border='1px solid'
-      borderColor='gray.100'
-      overflow='auto'
-      my='1'
-      maxHeight='500px'
-      minW='500px'
-      p='2'
+      flexDir="column"
+      bg="white"
+      w="full"
+      border="1px solid"
+      borderColor="gray.100"
+      overflow="auto"
+      my="1"
+      maxHeight="500px"
+      minW="500px"
+      p="2"
     >
       <Grid
-        templateColumns='4fr 1fr 1fr 4fr 2fr 1fr'
-        templateRows='repeat(auto-fill, 75px)'
-        columnGap='4'
-        rowGap='6'
-        placeItems='start'
-        px='4'
-        boxSizing='border-box'
-        alignItems='center'
-        minW='1000px'
+        templateColumns="4fr 1fr 1fr 1fr 4fr 2fr 1fr"
+        templateRows="repeat(auto-fill, 75px)"
+        columnGap="4"
+        rowGap="6"
+        placeItems="start"
+        px="4"
+        boxSizing="border-box"
+        alignItems="center"
+        minW="1000px"
       >
-        <Box my='4' w='full' gridColumn='1/-1'>
-          <Heading size='lg'>Sandboxes</Heading>
-          <Flex justifyContent='space-between' alignItems='center' w='full'>
-            <Flex w='full'>
-              <Text mr='2'>Created: {realmData.createdSandboxes}</Text>
-              <Text mr='2'>
-                Active:{' '}
+        <Box my="4" w="full" gridColumn="1/-1">
+          <Heading size="lg">Sandboxes</Heading>
+          <Flex justifyContent="space-between" alignItems="center" w="full">
+            <Flex w="full">
+              <Text mr="2">Created: {realmData.createdSandboxes}</Text>
+              <Text mr="2">
+                Active:{" "}
                 {realmData.createdSandboxes - realmData.deletedSandboxes}
               </Text>
               <Text>Deleted: {realmData.deletedSandboxes}</Text>
             </Flex>
             <Flex
-              display={{ base: 'none', md: 'flex' }}
-              w='full'
-              justifyContent='flex-end'
+              display={{ base: "none", md: "flex" }}
+              w="full"
+              justifyContent="flex-end"
             >
-              <IconButton mx='1' onClick={handleRefresh}>
+              <IconButton mx="1" onClick={handleRefresh}>
                 <FiRefreshCw />
               </IconButton>
-              <Button colorScheme='twitter' mx='1' onClick={handleRestartAll}>
+              <Button colorScheme="green" mx="1" onClick={toggleDialog}>
+                Add Sandbox
+              </Button>
+              <Button colorScheme="twitter" mx="1" onClick={handleRestartAll}>
                 Restart all
               </Button>
-              <Button colorScheme='twitter' mx='1' onClick={handleStartAll}>
+              <Button colorScheme="twitter" mx="1" onClick={handleStartAll}>
                 Start all
               </Button>
-              <Button colorScheme='twitter' mx='1' onClick={handleStopAll}>
+              <Button colorScheme="twitter" mx="1" onClick={handleStopAll}>
                 Stop all
               </Button>
             </Flex>
-            <Flex display={{ base: 'flex', md: 'none' }}>
-              <IconButton mx='1' onClick={handleRefresh}>
+            <Flex display={{ base: "flex", md: "none" }}>
+              <IconButton mx="1" onClick={handleRefresh}>
                 <FiRefreshCw />
               </IconButton>
               <Menu>
                 <MenuButton
-                  display='flex'
-                  justifyContent='center'
-                  colorScheme='gray'
+                  display="flex"
+                  justifyContent="center"
+                  colorScheme="gray"
                   as={Button}
-                  px='3'
+                  px="3"
                 >
                   <MdMoreVert />
                 </MenuButton>
@@ -236,7 +252,7 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
           </Flex>
         </Box>
         {tableColumns.map((c, i) => (
-          <Heading key={i} size='sm' mt='2' alignSelf='end'>
+          <Heading key={i} size="sm" mt="2" alignSelf="end">
             {c}
           </Heading>
         ))}
@@ -244,19 +260,24 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
         {sandboxDataFromServer &&
           sandboxDataFromServer.map((s) => (
             <React.Fragment key={s.id}>
-              <Text color='#1da1f2'>
+              <Text color="#1da1f2">
                 <Link to={`/sandbox/${s.id}`}>{s.id}</Link>
               </Text>
               <Text>{s.instance}</Text>
               <Text>{s.state}</Text>
+              {s.autoScheduled ? (
+                <MdCheck color="green" />
+              ) : (
+                <MdClose color="red" />
+              )}
               <Text>{s.createdBy}</Text>
               <Text>
-                {new Intl.DateTimeFormat('en-US', {
-                  year: 'numeric',
-                  month: 'short',
-                  day: '2-digit',
-                  hour: 'numeric',
-                  minute: 'numeric',
+                {new Intl.DateTimeFormat("en-US", {
+                  year: "numeric",
+                  month: "short",
+                  day: "2-digit",
+                  hour: "numeric",
+                  minute: "numeric",
                 }).format(new Date(s.createdAt))}
               </Text>
               <Menu>
@@ -272,9 +293,9 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
                   <MenuItem
                     onClick={() =>
                       window.confirm(
-                        'Are you sure you want to reset this sandbox (' +
+                        "Are you sure you want to reset this sandbox (" +
                           s.instance +
-                          ')?'
+                          ")?"
                       ) && handleReset(s.id)
                     }
                   >
@@ -283,9 +304,9 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
                   <MenuItem
                     onClick={() =>
                       window.confirm(
-                        'Are you sure you want to delete this sandbox (' +
+                        "Are you sure you want to delete this sandbox (" +
                           s.instance +
-                          ')?'
+                          ")?"
                       ) && handleDelete(s.id)
                     }
                   >
@@ -296,6 +317,12 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
             </React.Fragment>
           ))}
       </Grid>
+      <SandBoxFormDialog
+        isOpen={isOpen}
+        handleClose={toggleDialog}
+        realmId={realmId}
+        handleSubmit={handleUpdate}
+      />
       {isLoading && <CenterSpinner />}
     </Flex>
   );

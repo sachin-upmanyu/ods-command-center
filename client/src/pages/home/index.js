@@ -125,6 +125,12 @@ function Home() {
     // selectRealm(realmId);
     setRealmConfig(updatedRealmData);
   };
+
+  const handleSandBoxAdd = (updatedRealmData) => {
+    // selectRealm(realmId);
+    getSandboxData();
+  };
+
   useEffect(() => {
     getRealmsList();
     getSandboxData();
@@ -208,6 +214,7 @@ function Home() {
                 sandboxTableList={selectedRealmSandboxes}
                 realmId={selectedRealm.id}
                 realmData={selectedRealm}
+                handleSandBoxAdd={handleSandBoxAdd}
               />
             </Flex>
             <Grid

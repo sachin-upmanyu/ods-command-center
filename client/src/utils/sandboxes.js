@@ -261,8 +261,9 @@ export const tableColumns = [
   'Id',
   'Instance',
   'State',
-  'createdBy',
-  'CreatedAt',
+  'schedule',
+  'Created By',
+  'Created At',
   'Actions',
 ];
 

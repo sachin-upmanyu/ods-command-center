@@ -226,6 +226,70 @@ router.get('/sandbox/realms/list', async (req, res, next) => {
 });
 
 /**
+ * Add sandbox
+ */
+router.post('/sandbox/create', async (req, res, next) => {
+  try {
+    const {
+      ttl,
+      realmId,
+      profile,
+      ocapiSettings,
+      webdavSettings,
+      autoSchedule,
+    } = req.body;
+    const filePath = path.resolve(process.cwd(), 'cli.js');
+    var returnData = '', child='';
+
+    if (autoSchedule) {
+      child = spawn('node', [
+          filePath,
+          'sandbox:create',
+          `--ttl=${ttl}`,
+          `--realm=${realmId}`,
+          `--profile=${profile}`,
+          `--auto-scheduled`,
+          '-j',
+        ]);
+    } else {
+      child = spawn('node', [
+          filePath,
+          'sandbox:create',
+          `--ttl=${ttl}`,
+          `--realm=${realmId}`,
+          `--profile=${profile}`,
+          // `--ocapi-settings=${ocapiSettings}`,
+          // `--webdav-settings=${webdavSettings}`,
+          '-j',
+        ]);
+    }
+
+    child.stdout.on('data', (data) => {
+      returnData += data.toString();
+    });
+    let error = false;
+    child.stderr.on('data', (data) => {
+      error = true;
+    });
+
+    child.on('close', (code) => {
+      if (code || error) {
+        res.status(400);
+        next({ message: 'Error ' });
+        return;
+      }
+      res.status(200).json(JSON.parse(returnData));
+    });
+
+    child.on('error', (err) => {
+      res.status(400).json(err);
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
  * Get realm usages
  */
 router.get('/sandbox/realms/list/:realmId/:topic', async (req, res, next) => {
