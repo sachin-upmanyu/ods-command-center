@@ -271,13 +271,12 @@ router.get('/sandbox/realms/list/:realmId/:topic', async (req, res, next) => {
   }
 });
 
-
 /**
  * Get realm configuration
  */
-  router.get('/sandbox/realm/config/:realmId', async (req, res, next) => {
+router.get('/sandbox/realm/config/:realmId', async (req, res, next) => {
   try {
-    const { realmId} = req.params;
+    const { realmId } = req.params;
 
     const filePath = path.resolve(process.cwd(), 'cli.js');
     const child = spawn('node', [
@@ -313,7 +312,6 @@ router.get('/sandbox/realms/list/:realmId/:topic', async (req, res, next) => {
     next(err);
   }
 });
-
 
 // update realm configuration
 router.patch('/sandbox/realm/config/update', async (req, res, next) => {
@@ -360,7 +358,6 @@ router.patch('/sandbox/realm/config/update', async (req, res, next) => {
     next(err);
   }
 });
-
 
 // sandbox:list lands here
 router.get('/sandbox/list', async (req, res, next) => {

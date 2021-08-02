@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Modal,
   ModalContent,
@@ -11,26 +11,109 @@ import {
   ModalBody,
   ModalOverlay,
   Checkbox,
-} from '@chakra-ui/react';
-import { useAxios } from '../../hooks/axiosHook';
-import { useToastMessage } from '../../hooks/toastHook';
-import CenterSpinner from '../centerSpinner/CenterSpinner';
+  CheckboxGroup,
+} from "@chakra-ui/react";
+import { useAxios } from "../../hooks/axiosHook";
+import { useToastMessage } from "../../hooks/toastHook";
+import CenterSpinner from "../centerSpinner/CenterSpinner";
 
 const initialState = {
-  start_time: '',
-  stop_time: '',
-  weekdays: []
+  start_time: "",
+  stop_time: "",
+  weekdays: [],
 };
 
-function SchedulerFormDialog({ isOpen, handleClose, submit, realmId }) {
+const daysList = [
+  "MONDAY",
+  "TUESDAY",
+  "WEDNESDAY",
+  "THURSDAY",
+  "FRIDAY",
+  "SATURDAY",
+  "SUNDAY",
+];
+
+function SchedulerFormDialog({
+  isOpen,
+  handleClose,
+  handleSubmit,
+  realmId,
+  realmData,
+}) {
   const [state, setState] = useState(initialState);
   const { patchRequest } = useAxios();
   const { errorToastMessage, successToastMessage } = useToastMessage();
   const [isLoading, setIsLoading] = useState(false);
 
   const onClose = () => {
-    setState(initialState);
+    if (realmData && realmData.startScheduler) {
+      const { time: startTimeCopy } = realmData.startScheduler;
+      const { time: endTimeCopy } = realmData.stopScheduler;
+  
+      const start_time =
+        startTimeCopy.split("Z")[0].split(":").length === 3
+          ? startTimeCopy.split("Z")[0].split(":").slice(0, 2).join(":")
+          : startTimeCopy.split("Z")[0].split(":").join(":");
+  
+      const stop_time =
+        endTimeCopy.split("Z")[0].split(":").length === 3
+          ? endTimeCopy.split("Z")[0].split(":").slice(0, 2).join(":")
+          : endTimeCopy.split("Z")[0].split(":").join(":");
+      
+      const weekdays = realmData.startScheduler.weekdays
+
+      setState({
+        ...initialState,
+        start_time,
+        stop_time,
+        weekdays,
+      });
+    } else {
+      const start_time = '';
+      const stop_time = '';
+      const weekdays = [];
+      setState({
+        ...initialState,
+        start_time,
+        stop_time,
+        weekdays,
+      });
+    }
     handleClose();
+  };
+
+  const updateState = () => {
+    if (realmData && realmData.startScheduler) {
+      const { time: startTimeCopy } = realmData.startScheduler;
+      const { time: endTimeCopy } = realmData.stopScheduler;
+
+      const start_time =
+        startTimeCopy.split("Z")[0].split(":").length === 3
+          ? startTimeCopy.split("Z")[0].split(":").slice(0, 2).join(":")
+          : startTimeCopy.split("Z")[0].split(":").join(":");
+
+      const stop_time =
+        endTimeCopy.split("Z")[0].split(":").length === 3
+          ? endTimeCopy.split("Z")[0].split(":").slice(0, 2).join(":")
+          : endTimeCopy.split("Z")[0].split(":").join(":");
+
+      setState({
+        ...state,
+        start_time,
+        stop_time,
+        weekdays: realmData.startScheduler.weekdays,
+      });
+    } else {
+      const start_time = '';
+      const stop_time = '';
+      const weekdays = [];
+      setState({
+        ...initialState,
+        start_time,
+        stop_time,
+        weekdays,
+      });
+    }
   };
 
   const handleChange = (event) => {
@@ -38,109 +121,97 @@ function SchedulerFormDialog({ isOpen, handleClose, submit, realmId }) {
     setState((s) => ({ ...s, [name]: value }));
   };
 
-  const handleChangeCheckbox = (event, newValue) => {
-    const { checked, name } = event.target;
-    setState((s) => ({ ...s, [name]: checked }));
+  const handleChangeCheckbox = (event) => {
+    setState((s) => ({ ...s, weekdays: event }));
   };
-  const daysOptions = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map((cur, ind) => {
-    return (
-      <FormControl id={ind}>
-        <Checkbox
-          name={cur}
-          value={cur}
-          onChange={handleChangeCheckbox}
-        >
-          {cur}
-        </Checkbox>
-      </FormControl>
-    )
-  })
 
-  const handleSubmit = async (event) => {
+  const handleFormSubmit = async (event) => {
     // Post request
     event.preventDefault();
     setIsLoading(true);
 
-    let weekdays = [];
-    if (state.Monday) weekdays.push('MONDAY')
-    if (state.Tuesday) weekdays.push('TUESDAY')
-    if (state.Wednesday) weekdays.push('WEDNESDAY')
-    if (state.Thursday) weekdays.push('THURSDAY')
-    if (state.Friday) weekdays.push('FRIDAY')
-    if (state.Saturday) weekdays.push('SATURDAY')
-    if (state.Sunday) weekdays.push('SUNDAY')
-
     let formArr = {
-      "realmId":realmId,
-      "schedule": {
-        "stopScheduler": {
-          "weekdays": weekdays,
-          "time": state.stop_time
+      realmId: realmId,
+      schedule: {
+        stopScheduler: {
+          weekdays: state.weekdays,
+          time: state.stop_time.concat(":00"),
         },
-        "startScheduler": {
-          "weekdays": weekdays,
-          "time": state.start_time
-        }
-      }
-    }
+        startScheduler: {
+          weekdays: state.weekdays,
+          time: state.start_time.concat(":00"),
+        },
+      },
+    };
     const res = await patchRequest(`/sandbox/realm/config/update`, { formArr });
-    setIsLoading(false);
+    if (res.stopScheduler && res.startScheduler) {
+      window.location.reload();
+    }
+    // const res = 'dsf';
     if (res.error) {
       errorToastMessage({
-        title: res.message ?? 'Error Occurred, please try again',
+        title: res.message ?? "Error Occurred, please try again",
       });
       return;
     }
-    handleClose();
-    successToastMessage({ title: 'Schedule updated successfully' });
-
-    // close dialog
-    try {
-      submit();
-    } catch(e) {
-      console.log(e);
-    }
-    // window.location.reload();
+    handleSubmit(res);
+    successToastMessage({ title: "Schedule updated successfully" });
+    setIsLoading(false);
   };
+
+  useEffect(() => {
+    updateState();
+  }, [realmData]);
+
+  useEffect(() => {
+  }, [state]);
+
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Update Scheduler Time</ModalHeader>
         <ModalBody>
-          <form onSubmit={handleSubmit}>
-            <Grid gap='3' my='2'>
-              <FormControl id='start_time'>
+          <form onSubmit={handleFormSubmit}>
+            <Grid gap="3" my="2">
+              <FormControl id="start_time">
                 <FormLabel>Start Time (in GMT)</FormLabel>
                 <Input
-                  name='start_time'
+                  name="start_time"
                   value={state.start_time}
-                  type='time'
+                  type="time"
                   onChange={handleChange}
-                  variant='filled'
+                  variant="filled"
+                  required="required"
                 />
               </FormControl>
-              <FormControl id='stop_time'>
+              <FormControl id="stop_time">
                 <FormLabel>Stop Time (in GMT)</FormLabel>
                 <Input
-                  name='stop_time'
+                  name="stop_time"
                   value={state.stop_time}
-                  type='time'
+                  type="time"
                   onChange={handleChange}
-                  variant='filled'
+                  variant="filled"
+                  required="required"
                 />
               </FormControl>
-              <FormLabel>Days</FormLabel>
-              {daysOptions}
-              <Grid templateColumns='repeat(2, 1fr)' gap='2'>
-                <Button
-                  onClick={handleClose}
-                  variant='outline'
-                  colorScheme='red'
-                >
+
+              <CheckboxGroup
+                onChange={handleChangeCheckbox}
+                value={state.weekdays}
+                isRequired="true"
+              >
+                {daysList.map((day) => (
+                  <Checkbox value={day}>{day}</Checkbox>
+                ))}
+              </CheckboxGroup>
+
+              <Grid templateColumns="repeat(2, 1fr)" gap="2">
+                <Button onClick={onClose} variant="outline" colorScheme="red">
                   Cancel
                 </Button>
-                <Button type='submit' variant='solid' colorScheme='twitter'>
+                <Button type="submit" variant="solid" colorScheme="twitter">
                   Submit
                 </Button>
               </Grid>
