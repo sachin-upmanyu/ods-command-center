@@ -289,6 +289,55 @@ router.post('/sandbox/create', async (req, res, next) => {
   }
 });
 
+
+/**
+ * Update sandbox
+ */
+ router.patch('/sandbox/update/:sandBoxId', async (req, res, next) => {
+  try {
+    const { sandBoxId } = req.params;
+    const {
+      ttl,
+      autoSchedule,
+    } = req.body;
+    const filePath = path.resolve(process.cwd(), 'cli.js');
+    var returnData = '';
+    // console.log(ttl, autoSchedule, sandBoxId)
+    // res.status(200).json(autoSchedule);
+
+    const child = spawn('node', [
+        filePath,
+        'sandbox:update',
+        `--sandbox=${sandBoxId}`,
+        `--ttl=${ttl}`,
+        `--auto-scheduled=${autoSchedule}`,
+      ]);
+
+
+    child.stdout.on('data', (data) => {
+      returnData += data.toString();
+    });
+    let error = false;
+    child.stderr.on('data', (data) => {
+      error = true;
+    });
+
+    child.on('close', (code) => {
+      if (code || error) {
+        res.status(400);
+        next({ message: 'Error ' });
+        return;
+      }
+      res.status(200).json(returnData);
+    });
+
+    child.on('error', (err) => {
+      res.status(400).json(err);
+    });
+  } catch (err) {
+    next(err);
+  }
+});
 /**
  * Get realm usages
  */
