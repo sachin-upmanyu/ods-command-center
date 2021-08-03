@@ -46,74 +46,28 @@ function SchedulerFormDialog({
   const [isLoading, setIsLoading] = useState(false);
 
   const onClose = () => {
-    if (realmData && realmData.startScheduler) {
-      const { time: startTimeCopy } = realmData.startScheduler;
-      const { time: endTimeCopy } = realmData.stopScheduler;
-  
-      const start_time =
-        startTimeCopy.split("Z")[0].split(":").length === 3
-          ? startTimeCopy.split("Z")[0].split(":").slice(0, 2).join(":")
-          : startTimeCopy.split("Z")[0].split(":").join(":");
-  
-      const stop_time =
-        endTimeCopy.split("Z")[0].split(":").length === 3
-          ? endTimeCopy.split("Z")[0].split(":").slice(0, 2).join(":")
-          : endTimeCopy.split("Z")[0].split(":").join(":");
-      
-      const weekdays = realmData.startScheduler.weekdays
+    updateState();
 
-      setState({
-        ...initialState,
-        start_time,
-        stop_time,
-        weekdays,
-      });
-    } else {
-      const start_time = '';
-      const stop_time = '';
-      const weekdays = [];
-      setState({
-        ...initialState,
-        start_time,
-        stop_time,
-        weekdays,
-      });
-    }
     handleClose();
   };
 
   const updateState = () => {
+    let start_time = '';
+    let stop_time = '';
+    let weekdays = [];
+
     if (realmData && realmData.startScheduler) {
-      const { time: startTimeCopy } = realmData.startScheduler;
-      const { time: endTimeCopy } = realmData.stopScheduler;
-
-      const start_time =
-        startTimeCopy.split("Z")[0].split(":").length === 3
-          ? startTimeCopy.split("Z")[0].split(":").slice(0, 2).join(":")
-          : startTimeCopy.split("Z")[0].split(":").join(":");
-
-      const stop_time =
-        endTimeCopy.split("Z")[0].split(":").length === 3
-          ? endTimeCopy.split("Z")[0].split(":").slice(0, 2).join(":")
-          : endTimeCopy.split("Z")[0].split(":").join(":");
-
-      setState({
-        ...state,
-        start_time,
-        stop_time,
-        weekdays: realmData.startScheduler.weekdays,
-      });
-    } else {
-      const start_time = '';
-      const stop_time = '';
-      const weekdays = [];
-      setState({
-        ...initialState,
-        start_time,
-        stop_time,
-        weekdays,
-      });
+      start_time = realmData.startScheduler.time;
+      stop_time = realmData.stopScheduler.time;
+      weekdays = realmData.startScheduler.weekdays
     }
+
+    setState({
+      ...initialState,
+      start_time,
+      stop_time,
+      weekdays,
+    });
   };
 
   const handleChange = (event) => {
@@ -135,11 +89,11 @@ function SchedulerFormDialog({
       schedule: {
         stopScheduler: {
           weekdays: state.weekdays,
-          time: state.stop_time.concat(":00"),
+          time: state.stop_time,
         },
         startScheduler: {
           weekdays: state.weekdays,
-          time: state.start_time.concat(":00"),
+          time: state.start_time,
         },
       },
     };
@@ -162,9 +116,6 @@ function SchedulerFormDialog({
   useEffect(() => {
     updateState();
   }, [realmData]);
-
-  useEffect(() => {
-  }, [state]);
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -203,7 +154,7 @@ function SchedulerFormDialog({
                 isRequired="true"
               >
                 {daysList.map((day) => (
-                  <Checkbox value={day}>{day}</Checkbox>
+                  <Checkbox key={day} value={day}>{day}</Checkbox>
                 ))}
               </CheckboxGroup>
 

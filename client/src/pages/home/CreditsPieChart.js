@@ -39,8 +39,8 @@ function CreditsPieChart({ realmDataFromServer }) {
       if (res.remainingCreditPercent > 90) {
         errorToastMessage({
           title: 'Credit Consumption Alert',
-          description: 'Please add credit',
-          duration: null,
+          description: `Consumed  ${Math.round(res.remainingCreditPercent)}% credits`,
+          duration: 6000,
         });
       }
       setIsShowChart(true);

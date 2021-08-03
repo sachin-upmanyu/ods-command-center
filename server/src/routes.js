@@ -943,29 +943,21 @@ router.get('/credit/get-list/:realmId', async (req, res, next) => {
   try {
     //id is realm id
     const { realmId } = req.params;
-    if (process.env.DEMO_MODE === 'On') {
-      var dataList = [
-        { id: 1, credit: 121, purchaseDate: Date.now() },
-        { id: 2, credit: 145, purchaseDate: Date.now() },
-        { id: 3, credit: 1212, purchaseDate: Date.now() },
-      ];
-      res.status(200).json(dataList);
-    } else {
-      return db.Credit.findAll({
-        where: {
-          realmId: realmId,
-        },
-      })
-        .then((credits) => res.status(200).json(credits))
-        .catch((err) => {
-          console.log(
-            'There was an error querying credits',
-            JSON.stringify(err),
-          );
-          res.status(400).json('Error');
-          // return res.send(err)
-        });
-    }
+
+    return db.Credit.findAll({
+      where: {
+        realmId: realmId,
+      },
+    })
+      .then((credits) => res.status(200).json(credits))
+      .catch((err) => {
+        console.log(
+          'There was an error querying credits',
+          JSON.stringify(err),
+        );
+        res.status(400).json('Error');
+        // return res.send(err)
+      });
   } catch (err) {
     next(err);
   }
@@ -1197,12 +1189,6 @@ router.get('/notify-user', async (req, res, next) => {
                   res.status(200).json({ realmId: realmId });
                 }
               }
-              // console.log(
-              //   'test',
-              //   '----------------------',
-              //   remainingCreditPercent,
-              //   creditListData.notifyCheck,
-              // );
             })
             .catch((err) => {
               console.log(

@@ -28,7 +28,7 @@ function SandboxTable({ sandboxTableList, realmId, realmData, handleSandBoxAdd }
   const [sandboxDataFromServer, setSandboxDataFromServer] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
 
-  const toggleDialog = () => {
+  const toggleAddDialog = () => {
     setIsOpen((o) => !o);
   };
 
@@ -165,7 +165,7 @@ function SandboxTable({ sandboxTableList, realmId, realmData, handleSandBoxAdd }
 
   const handleUpdate = (createdSandBox) => {
     handleSandBoxAdd(createdSandBox);
-    toggleDialog();
+    toggleAddDialog();
   };
 
   useEffect(() => {
@@ -215,7 +215,7 @@ function SandboxTable({ sandboxTableList, realmId, realmData, handleSandBoxAdd }
               <IconButton mx="1" onClick={handleRefresh}>
                 <FiRefreshCw />
               </IconButton>
-              <Button colorScheme="green" mx="1" onClick={toggleDialog}>
+              <Button colorScheme="green" mx="1" onClick={toggleAddDialog}>
                 Add Sandbox
               </Button>
               <Button colorScheme="twitter" mx="1" onClick={handleRestartAll}>
@@ -243,6 +243,8 @@ function SandboxTable({ sandboxTableList, realmId, realmData, handleSandBoxAdd }
                   <MdMoreVert />
                 </MenuButton>
                 <MenuList>
+                  {/* TODO: fix responsive design for "Add" form */}
+                  {/* <MenuItem onClick={toggleAddDialog}>Add Sandbox</MenuItem> */}
                   <MenuItem onClick={handleRestartAll}>Restart all</MenuItem>
                   <MenuItem onClick={handleStartAll}>Start all</MenuItem>
                   <MenuItem onClick={handleStopAll}>Stop all</MenuItem>
@@ -319,7 +321,7 @@ function SandboxTable({ sandboxTableList, realmId, realmData, handleSandBoxAdd }
       </Grid>
       <SandBoxFormDialog
         isOpen={isOpen}
-        handleClose={toggleDialog}
+        handleClose={toggleAddDialog}
         realmId={realmId}
         handleSubmit={handleUpdate}
       />
