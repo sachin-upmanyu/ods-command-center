@@ -10,6 +10,7 @@ function CenterSpinner() {
       left='0'
       width='100%'
       bg='#80808042'
+      zIndex="1500"
     >
       <Flex
         height='100%'

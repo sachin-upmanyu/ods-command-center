@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Modal,
   ModalContent,
@@ -22,26 +22,30 @@ import CenterSpinner from "../centerSpinner/CenterSpinner";
 
 const initialState = {
   ttl: 0,
-  profile: "medium",
-  // ocapiSettings: "",
-  // webdavSettings: "",
-  autoSchedule: 0,
+  autoSchedule: false,
 };
 
-function SandBoxFormDialog({ isOpen, handleClose, realmId, handleSubmit }) {
+function SandBoxUpdateFormDialog({ isOpen, handleClose, sandBoxId, autoSchedule, handleSubmit }) {
   const [state, setState] = useState(initialState);
-  const { postRequest } = useAxios();
+  const { patchRequest } = useAxios();
   const { errorToastMessage, successToastMessage } = useToastMessage();
   const [isLoading, setIsLoading] = useState(false);
 
+
+  const updateState = () => {
+    let ttl = 0;
+    setState({
+      ...initialState,
+      ttl,
+      autoSchedule,
+    });
+  };
   const onClose = () => {
     setState(...initialState);
-    handleClose();
   };
 
   const handleChange = (event) => {
     const { value, name } = event.target;
-    console.log(value, name);
     setState((s) => ({ ...s, [name]: value }));
   };
 
@@ -54,8 +58,7 @@ function SandBoxFormDialog({ isOpen, handleClose, realmId, handleSubmit }) {
     // Post request
     event.preventDefault();
     setIsLoading(true);
-    const res = await postRequest(`/sandbox/create/`, { ...state, realmId });
-    console.log(res, state);
+    const res = await patchRequest(`/sandbox/update/${sandBoxId}`, { ...state, sandBoxId });
     setIsLoading(false);
     if (res.error) {
       errorToastMessage({
@@ -63,16 +66,23 @@ function SandBoxFormDialog({ isOpen, handleClose, realmId, handleSubmit }) {
       });
       return;
     } else {
-      successToastMessage({ title: res.message });
+      successToastMessage({ title: `Sandbox Configuration has been updated.`  });
     }
     handleSubmit();
     // close dialog
   };
+
+  useEffect(() => {
+    console.log(sandBoxId, autoSchedule)
+
+    updateState();
+  }, [autoSchedule]);
+
   return (
     <Modal isOpen={isOpen} onClose={handleClose} size="6xl">
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader textAlign="center">Add SandBox</ModalHeader>
+        <ModalHeader textAlign="center">Update Sandbox Configuration</ModalHeader>
         <ModalBody>
           <Grid templateColumns="5fr 2fr" gap="4" alignItems="center" p="2">
             <GridItem
@@ -83,13 +93,6 @@ function SandBoxFormDialog({ isOpen, handleClose, realmId, handleSubmit }) {
               borderRadius="lg"
               rowSpan={4}
             >
-              <Text mb="4">
-                You must have permission to create a new sandbox for the realm.
-                The number of sandboxes allowed to create is limited. The
-                command only trigger the creation and does not wait until the
-                sandbox is fully up and running. Use may use refresh the Sandbox
-                list to check the status of the sandbox.
-              </Text>
               <Text as="b" pt="2">
                 TTL
               </Text>
@@ -103,13 +106,6 @@ function SandBoxFormDialog({ isOpen, handleClose, realmId, handleSubmit }) {
                 The Auto Scheduled flag controls if the sandbox is being auto
                 scheduled according to the schedule configured at sandbox realm
                 level. If omitted the sandbox is not auto scheduled.
-              </Text>
-              <Text as="b">Sandbox Profile</Text>
-              <Text>
-                Use the Profile dropdown to set the resource allocation for the
-                sandbox, "medium" is the default. Be careful, more powerful
-                profiles consume more credits. Supported values are: medium,
-                large, xlarge.
               </Text>
             </GridItem>
             <GridItem
@@ -135,48 +131,16 @@ function SandBoxFormDialog({ isOpen, handleClose, realmId, handleSubmit }) {
                       min={0}
                     />
                   </FormControl>
-                  <FormControl id="profile">
-                    <FormLabel>Profile</FormLabel>
-                    <Select
-                      placeholder="Select option"
-                      isRequired="true"
-                      variant="filled"
-                      onChange={handleChange}
-                      name="profile"
-                      value={state.profile}
-                    >
-                      <option value="medium">Medium</option>
-                      <option value="large">Large</option>
-                      <option value="xlarge">XLarge</option>
-                    </Select>
-                  </FormControl>
                   <FormControl id="autoSchedule">
                     <Checkbox
                       name="autoSchedule"
                       value={state.autoSchedule}
+                      isChecked={state.autoSchedule}
                       onChange={handleChangeCheckbox}
                     >
                       Auto Scheduled
                     </Checkbox>
                   </FormControl>
-                  {/* <FormControl id="ocapiSettings">
-                <FormLabel>Ocapi Settings</FormLabel>
-                <Textarea
-                  placeholder="Ocapi Settings"
-                  name="ocapiSettings"
-                  variant="filled"
-                  onChange={handleChange}
-                />
-              </FormControl>
-              <FormControl id="webdavSettings">
-                <FormLabel>Webdav Settings</FormLabel>
-                <Textarea
-                  placeholder="Webdav Settings"
-                  name="webdavSettings"
-                  variant="filled"
-                  onChange={handleChange}
-                />
-              </FormControl> */}
                   <Grid templateColumns="repeat(2, 1fr)" gap="2" justifyContent="flex-end">
                     <Button
                       onClick={handleClose}
@@ -200,4 +164,4 @@ function SandBoxFormDialog({ isOpen, handleClose, realmId, handleSubmit }) {
   );
 }
 
-export default SandBoxFormDialog;
+export default SandBoxUpdateFormDialog;

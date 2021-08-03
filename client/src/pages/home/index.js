@@ -126,7 +126,7 @@ function Home() {
     setRealmConfig(updatedRealmData);
   };
 
-  const handleSandBoxAdd = (updatedRealmData) => {
+  const handleSandBoxAdd = () => {
     // selectRealm(realmId);
     getSandboxData();
   };

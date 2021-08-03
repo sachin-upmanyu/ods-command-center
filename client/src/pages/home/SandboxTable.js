@@ -14,12 +14,13 @@ import {
 } from "@chakra-ui/react";
 import { FiRefreshCw } from "react-icons/fi";
 import { tableColumns } from "../../utils/sandboxes";
-import { MdCheck, MdClose, MdMoreVert } from "react-icons/md";
+import { MdCheck, MdClose, MdMoreVert, MdModeEdit } from "react-icons/md";
 import { Link } from "react-router-dom";
 import { useAxios } from "../../hooks/axiosHook";
 import { useToastMessage } from "../../hooks/toastHook";
 import CenterSpinner from "../../components/centerSpinner/CenterSpinner";
 import SandBoxFormDialog from "../../components/SandBox/SandBoxFormDialog";
+import SandBoxUpdateFormDialog from "../../components/SandBox/SandBoxUpdateFormDialog";
 
 function SandboxTable({ sandboxTableList, realmId, realmData, handleSandBoxAdd }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -27,10 +28,23 @@ function SandboxTable({ sandboxTableList, realmId, realmData, handleSandBoxAdd }
   const { errorToastMessage, successToastMessage } = useToastMessage();
   const [sandboxDataFromServer, setSandboxDataFromServer] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [isSandboxUpdateOpen, setIsSandboxUpdateOpen] = useState(false);
+  const [sandBoxId, setSandBoxId] = useState(false);
+  const [isAutoScheduled, setIsAutoScheduled] = useState(false);
 
   const toggleAddDialog = () => {
+    console.log('sandboxId');
     setIsOpen((o) => !o);
   };
+  const toggleUpdateDialog = async (sandboxId, autoSchedule) => {
+    await setSandBoxId(sandboxId);
+    await setIsAutoScheduled(autoSchedule);
+    setIsSandboxUpdateOpen((o) => !o);
+  };
+
+  const handleClose = () => {
+    setIsSandboxUpdateOpen((o) => !o);
+  }
 
   const handleStartAll = async () => {
     setIsLoading(true);
@@ -163,9 +177,14 @@ function SandboxTable({ sandboxTableList, realmId, realmData, handleSandBoxAdd }
     window.location.reload();
   };
 
-  const handleUpdate = (createdSandBox) => {
-    handleSandBoxAdd(createdSandBox);
+  const handleUpdate = () => {
+    handleSandBoxAdd();
     toggleAddDialog();
+  };
+
+  const handleUpdateSandBox = () => {
+    handleSandBoxAdd();
+    toggleUpdateDialog();
   };
 
   useEffect(() => {
@@ -267,11 +286,16 @@ function SandboxTable({ sandboxTableList, realmId, realmData, handleSandBoxAdd }
               </Text>
               <Text>{s.instance}</Text>
               <Text>{s.state}</Text>
+              <Text>
               {s.autoScheduled ? (
-                <MdCheck color="green" />
+                <Button colorScheme="green" size="sm"><MdCheck color="white" /></Button>
               ) : (
-                <MdClose color="red" />
+                <Button colorScheme="red" size="sm"><MdClose color="white" /></Button>
               )}
+                <Button colorScheme="twitter" mx="1" size="sm" onClick={() =>toggleUpdateDialog(s.id, s.autoScheduled)}>
+                  <MdModeEdit/>  Edit
+                </Button>
+              </Text>
               <Text>{s.createdBy}</Text>
               <Text>
                 {new Intl.DateTimeFormat("en-US", {
@@ -324,6 +348,13 @@ function SandboxTable({ sandboxTableList, realmId, realmData, handleSandBoxAdd }
         handleClose={toggleAddDialog}
         realmId={realmId}
         handleSubmit={handleUpdate}
+      />
+      <SandBoxUpdateFormDialog
+        isOpen={isSandboxUpdateOpen}
+        handleClose={handleClose}
+        sandBoxId={sandBoxId}
+        autoSchedule={isAutoScheduled}
+        handleSubmit={handleUpdateSandBox}
       />
       {isLoading && <CenterSpinner />}
     </Flex>
