@@ -31,13 +31,13 @@ const checkisAuth = (req, res, next) => {
  */
 router.post('/auth/login', async (req, res, next) => {
   try {
+console.log(req.body);
     const filePath = path.resolve(process.cwd(), 'cli.js');
-    const { client, clientSecret } = req.body;
+    const { client } = req.body;
     const child = spawn('node', [
       filePath,
       'auth:login',
       `${client}`,
-      `${clientSecret}`,
     ]);
 
     let requestResult = '';
