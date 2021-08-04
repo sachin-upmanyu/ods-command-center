@@ -77,7 +77,7 @@ function Login(props) {
     setIsLoading(true);
     const requestResult = await getRequest('/dwjson/login');
     setIsLoading(false);
-    
+
     if (requestResult && requestResult.login) {
       localStorage.setItem('token', requestResult.token);
       history.push('');
@@ -94,9 +94,9 @@ function Login(props) {
     >
       <Box background='#FFFFFF' padding='10' borderRadius='12px'>
         <Heading textAlign='center' my='4' color='twitter.500'>
-          Login Here
+          Login
         </Heading>
-        <Heading size='md'>with clientId</Heading>
+        <Heading size='md'>with Client ID (requires port 8080 to be available)</Heading>
 
         <form onSubmit={handleAuthorize}>
           <Input
@@ -156,7 +156,7 @@ function Login(props) {
           </Button>
         </form>
         <Divider mt='10' mb='2' />
-        <Heading size='md'>or with dw.json</Heading>
+        <Heading size='md'>or with dw.json (requires dw.json to be present in server)</Heading>
         <Button
           onClick={handleFileLogin}
           colorScheme='twitter'

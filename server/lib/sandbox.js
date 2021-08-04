@@ -22,7 +22,7 @@ const API_HOST = getAPIHost();
 const API_BASE = API_HOST + '/api/v1';
 const API_SANDBOXES = API_BASE + '/sandboxes';
 const API_SYSTEM = API_BASE + '/system';
-const SANDBOX_API_POLLING_TIMEOUT = 1000 * 60 * 10; // 10 minutes
+const SANDBOX_API_POLLING_TIMEOUT = 1000 * 60 * 15; // 15 minutes
 const SANDBOX_HOST_PATTERN = '%s-%s.sandbox.us01.dx.commercecloud.salesforce.com';
 // ocapi settings to apply to sandbox at provisioning time, CLIENTID to be set beforehand
 const SANDBOX_OCAPI_SETTINGS = [{ client_id: "CLIENTID",
@@ -49,6 +49,7 @@ const SANDBOX_STATUS_POLL_ERROR_THRESHOLD = 3;
 const SANDBOX_STATUS_UP_AND_RUNNING = 'started';
 const SANDBOX_STATUS_FAILED = 'failed';
 const BM_PATH = '/on/demandware.store/Sites-Site';
+const SANDBOX_RESOURCE_PROFILES = [ 'medium', 'large', 'xlarge' ];
 
 // enable request debugging
 if ( process.env.DEBUG ) {
@@ -137,7 +138,7 @@ function askQuestion(query) {
 /**
  * Prints the inbound IP addresses of the cluster on the console.
  */
-function printInboundIPs(json) {
+function printInboundIPs(json, cli) {
     var options = ocapi.getOptions('GET', API_SYSTEM);
 
     ocapi.retryableCall('GET', options, function (err, res) {
@@ -147,7 +148,11 @@ function printInboundIPs(json) {
             console.error(res.body)
         } else {
             if (json) {
-                console.json(res.body.data.inboundIps);
+                if (cli) {
+                    console.json({'inbound': res.body.data.inboundIps});
+                } else {
+                    console.json(res.body.data.inboundIps);
+                }
                 return;
             }
             console.log('');
@@ -157,6 +162,39 @@ function printInboundIPs(json) {
             var data = [['address']];
             for (var i in res.body.data.inboundIps) {
                 data.push([res.body.data.inboundIps[i]]);
+            }
+            console.table(data);
+        }
+    });
+}
+
+/**
+ * Prints the outbound IP addresses of the cluster on the console.
+ */
+function printOutboundIPs(json, cli) {
+    var options = ocapi.getOptions('GET', API_SYSTEM);
+
+    ocapi.retryableCall('GET', options, function (err, res) {
+        if (err) {
+            console.error(err)
+        } else if (res.statusCode >= 400) {
+            console.error(res.body)
+        } else {
+            if (json) {
+                if (cli) {
+                    console.json({'outbound': res.body.data.outboundIps});
+                } else {
+                    console.json(res.body.data.outboundIps);
+                }
+                return;
+            }
+            console.log('');
+            console.log('Outbound IP addresses:');
+
+            // table fields
+            var data = [['address']];
+            for (var i in res.body.data.outboundIps) {
+                data.push([res.body.data.outboundIps[i]]);
             }
             console.table(data);
         }
@@ -237,7 +275,7 @@ function getRealms(callback) {
  * @param {String} topic the topic to retrieve details about
  * @param {Function} callback the callback to execute, the error and the realm are available as arguments to the callback function
  */
-function getRealm(realmID, topic, callback) {
+function getRealm(realmID, topic, isConfig, callback) {
     // build the request options
     // use some default expansions
     var extension = '?expand=configuration,usage';
@@ -248,6 +286,9 @@ function getRealm(realmID, topic, callback) {
         if ( topic === 'usage' ) {
             extension += '?from=2019-01-01';
         }
+    }
+    if (isConfig === 'all') {
+        extension = '/configuration';
     }
     ocapi.retryableCall('GET', API_BASE + '/realms/' + realmID + extension, function(err, res) {
         if ( err ) {
@@ -269,12 +310,12 @@ function getRealm(realmID, topic, callback) {
  * @param {Number} defaultSandboxTTL the new default sandbox ttl
  * @param {Function} callback the callback to execute, the error and the realm details are available as arguments to the callback function
  */
-function updateRealm(realmID, maxSandboxTTL, defaultSandboxTTL, callback) {
-    // build the request options
+function updateRealm(realmID, maxSandboxTTL, defaultSandboxTTL, schedule, callback) {
+  // build the request options
     var options = ocapi.getOptions('PATCH', API_BASE + '/realms/' + realmID + '/configuration');
 
     // the payload
-    options['body'] = { sandbox : { sandboxTTL : {} } };
+    options['body'] = { sandbox : { sandboxTTL : {}, startScheduler : {}, stopScheduler : {} } };
 
     if (maxSandboxTTL) {
         options['body']['sandbox']['sandboxTTL']['maximum'] = maxSandboxTTL.toFixed();
@@ -283,6 +324,23 @@ function updateRealm(realmID, maxSandboxTTL, defaultSandboxTTL, callback) {
         options['body']['sandbox']['sandboxTTL']['defaultValue'] = defaultSandboxTTL.toFixed();
     }
 
+    // TODO set schedule here
+    if (schedule) {
+        schedule = JSON.parse(schedule);
+    //   schedule = { startScheduler : {}, stopScheduler : {} };
+    //   schedule['startScheduler']['time'] = "11:00:00+05:30";
+    //   schedule['startScheduler']['weekdays'] = ["MONDAY","TUESDAY","WEDNESDAY"];
+    //   schedule['stopScheduler']['time'] = "21:00:00+05:30";
+    //   schedule['stopScheduler']['weekdays'] = ["MONDAY","TUESDAY","WEDNESDAY"];
+
+      schedule['startScheduler']['time'] = schedule.startScheduler.time ? schedule.startScheduler.time : null;
+      schedule['startScheduler']['weekdays'] = schedule.startScheduler.weekdays ? schedule.startScheduler.weekdays : null;
+      schedule['stopScheduler']['time'] = schedule.stopScheduler.time ? schedule.stopScheduler.time : null;
+      schedule['stopScheduler']['weekdays'] = schedule.stopScheduler.weekdays ? schedule.stopScheduler.weekdays : null;
+
+      options['body']['sandbox']['stopScheduler'] = schedule['stopScheduler'] ? schedule['stopScheduler'] : null;
+      options['body']['sandbox']['startScheduler'] = schedule['startScheduler'] ? schedule['startScheduler'] : null;
+    }
     ocapi.retryableCall('PATCH', options, function(err, res) {
         var errback = captureCommonErrors(err, res);
         if ( !errback ) {
@@ -379,11 +437,14 @@ function getSandboxHost(sandbox) {
  *
  * @param {String} realm the realm to create the sandbox for
  * @param {String} ttl the ttl of the sandbox in hours
+ * @param {String} profile the resource profile of the sandbox
+ * @param {Boolean} autoScheduled sets the sandbox as auto scheduled
  * @param {String} additionalOcapiSettings JSON string holding additonal OCAPI settings to pass
  * @param {String} additionalWebdavSettings JSON string holding additonal WebDAV permissions to pass
  * @param {Function} callback the callback to execute, the error and the created sandbox are available as arguments to the callback function
  */
-function createSandbox(realm, ttl, additionalOcapiSettings, additionalWebdavSettings, callback) {
+function createSandbox(realm, ttl, profile, autoScheduled, additionalOcapiSettings, additionalWebdavSettings,
+    callback) {
     if (!realm && dwjson['realm']) {
         realm = dwjson['realm'];
         console.debug('Using realm id %s from dw.json at %s', dwjson['realm'], process.cwd());
@@ -434,6 +495,21 @@ function createSandbox(realm, ttl, additionalOcapiSettings, additionalWebdavSett
         options['body']['ttl'] = ttl.toFixed();
     }
 
+    // set auto scheduled, if passed
+    if (autoScheduled) {
+        options['body']['autoScheduled'] = true;
+    }
+
+    // the profile, if passed
+    if (profile !== null) {
+        if (SANDBOX_RESOURCE_PROFILES.indexOf(profile) === -1) {
+            callback(new Error(`Invalid resource profile '${profile}', use one of:
+                ${SANDBOX_RESOURCE_PROFILES.join(', ')}`));
+            return;
+        }
+        options['body']['resourceProfile'] = profile;
+    }
+
     ocapi.retryableCall('POST', options, function(err, res) {
         var errback = captureCommonErrors(err, res);
         if ( !errback ) {
@@ -482,17 +558,22 @@ function getSandbox(id, topic, callback) {
  *
  * @param {String} id the sandbox update
  * @param {Number} ttl the ttl to update (value will not overwrite the existing ttl, but added to the ttl = prolonged)
+ * @param {Boolean} autoScheduled sets the sandbox as auto scheduled
  * @param {Function} callback the callback to execute, the error and the sandbox details are available as arguments to the callback function
  */
-function updateSandbox(id, ttl, callback) {
+function updateSandbox(id, ttl, autoScheduled, callback) {
     // build the request options
     var options = ocapi.getOptions('PATCH', API_SANDBOXES + '/' + id);
+    options['body'] = {};
 
     // the ttl, if passed
     if (ttl !== null && !isNaN(ttl)) {
-        options['body'] = {
-            'ttl' : ttl.toFixed()
-        };
+        options['body']['ttl'] = ttl.toFixed();
+    }
+
+    // sets auto scheduled
+    if ( autoScheduled !== null ) {
+        options['body']['autoScheduled'] = autoScheduled;
     }
 
     ocapi.retryableCall('PATCH', options, function(err, res) {
@@ -711,10 +792,10 @@ module.exports.cli = {
          * @param {Boolean} asJson optional flag to force output in json, false by default
          * @param {String} sortBy optional field to sort the list by
          */
-        list : function(realm, topic, asJson, sortBy) {
+        list : function(realm, topic, isConfig, asJson, sortBy) {
             // get details of a single realm if realm id was passed
             if ( typeof(realm) !== 'undefined' && realm !== null ) {
-                getRealm(realm, topic, function (err, realm) {
+                getRealm(realm, topic, isConfig, function (err, realm) {
                     if (err) {
                         if (asJson) {
                             console.json({error: err.message});
@@ -770,9 +851,9 @@ module.exports.cli = {
          * @param {Number} maxSandboxTTL max number of hours a sandbox can live in the realm
          * @param {Number} defaultSandboxTTL number of hours a sandbox lives in the realm by default
          */
-        update : function(realm, maxSandboxTTL, defaultSandboxTTL, asJson) {
+        update : function(realm, maxSandboxTTL, defaultSandboxTTL, schedule, asJson) {
             // lookup realm to update
-            getRealm(realm, null, function (err, realm) {
+            getRealm(realm, null, null, function (err, realm) {
                 if (err) {
                     // error
                     console.error(err.message);
@@ -780,7 +861,7 @@ module.exports.cli = {
                 }
 
                 // realm found, now update
-                updateRealm(realm.id, maxSandboxTTL, defaultSandboxTTL, function(err, updatedRealm) {
+                updateRealm(realm.id, maxSandboxTTL, defaultSandboxTTL, schedule, function(err, updatedRealm) {
                     var result = {};
                     if (err) {
                         result['error'] = err.message;
@@ -828,12 +909,52 @@ module.exports.cli = {
             }
 
             // table fields
-            var data = [['id','realm','instance','version','state','createdAt','eol','createdBy']];
+            var data = [['id','realm','instance','version','state','createdAt','eol','createdBy','autoScheduled']];
             for (var i of list) {
-                data.push([i.id,i.realm,i.instance,i.versions.app,i.state,i.createdAt,i.eol,i.createdBy]);
+                data.push([i.id,i.realm,i.instance,i.versions.app,i.state,i.createdAt,i.eol,i.createdBy,
+                    i.autoScheduled]);
             }
 
             console.table(data);
+        });
+    },
+
+    ips : function (asJson) {
+
+        printInboundIPs(asJson, true, function(err, ips) {
+            if (err) {
+                console.error(err.message);
+                return;
+            }
+            if (asJson) {
+                console.json(ips);
+                return;
+            }
+
+            if (ips.length === 0) {
+                console.info('No sandboxes found');
+                return;
+            }
+
+            console.info(ips);
+        });
+
+        printOutboundIPs(asJson, true, function(err, ips) {
+            if (err) {
+                console.error(err.message);
+                return;
+            }
+            if (asJson) {
+                console.json(ips);
+                return;
+            }
+
+            if (ips.length === 0) {
+                console.info('No sandboxes found');
+                return;
+            }
+
+            console.info(ips);
         });
     },
 
@@ -843,18 +964,21 @@ module.exports.cli = {
      * @param {String} realm the realm to create the sandbox in
      * @param {String} alias the alias to use for the created sandbox
      * @param {Number} ttl number of hours, the sandbox will live (if absent the realm default ttl is used)
+     * @param {String} profile resource profile used (if absent "medium" is used)
+     * @param {Boolean} autoScheduled sets the sandbox as auto scheduled (false by default)
      * @param {String} ocapiSettings additional ocapi settings
      * @param {String} webdavPermissions additional webdav permissions
      * @param {Boolean} asJson optional flag to force output in json, false by default
      * @param {Boolean} sync whether to operate in synchronous mode, false by default
      * * @param {Boolean} setAsDefault optional flag to set as new default instance, false by default
      */
-    create : function(realm, alias, ttl, ocapiSettings, webdavPermissions, asJson, sync, setAsDefault) {
+    create : function(realm, alias, ttl, profile, autoScheduled, ocapiSettings, webdavPermissions, asJson, sync,
+        setAsDefault) {
         // memorize the start time and duration
         var startTime = Date.now();
         var duration = 0;
 
-        createSandbox(realm, ttl, ocapiSettings, webdavPermissions, function(err, newSandbox) {
+        createSandbox(realm, ttl, profile, autoScheduled, ocapiSettings, webdavPermissions, function(err, newSandbox) {
             if (err) {
                 if (asJson) {
                     console.json({error: err.message});
@@ -1343,9 +1467,10 @@ module.exports.cli = {
      *
      * @param {String} spec specification of the sandbox to update
      * @param {Number} ttl number of hours, the sandbox TTL will be prolonged
+     * @param {Boolean} autoScheduled sets the sandbox as auto scheduled
      * @param {Boolean} asJson optional flag to force output in json, false by default
      */
-    update : function(spec, ttl, asJson) {
+    update : function(spec, ttl, autoScheduled, asJson) {
         // sandbox to update
         var foundSandbox = null;
 
@@ -1372,7 +1497,7 @@ module.exports.cli = {
                 return;
             } else {
                 // sandbox found, trigger operation
-                updateSandbox(foundSandbox.id, ttl, function(err, updatedSandbox) {
+                updateSandbox(foundSandbox.id, ttl, autoScheduled, function(err, updatedSandbox) {
                     var result = {};
                     if (err) {
                         result['error'] = err.message;

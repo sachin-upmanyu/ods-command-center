@@ -1,14 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
+  Text,
   Box,
   Heading,
-  Text,
   Flex,
   Button,
   IconButton,
@@ -16,20 +10,41 @@ import {
   MenuItem,
   MenuButton,
   MenuList,
-} from '@chakra-ui/react';
-import { FiRefreshCw } from 'react-icons/fi';
-import { tableColumns } from '../../utils/sandboxes';
-import { MdMoreVert } from 'react-icons/md';
-import { Link } from 'react-router-dom';
-import { useAxios } from '../../hooks/axiosHook';
-import { useToastMessage } from '../../hooks/toastHook';
-import CenterSpinner from '../../components/centerSpinner/CenterSpinner';
+  Grid,
+} from "@chakra-ui/react";
+import { FiRefreshCw } from "react-icons/fi";
+import { tableColumns } from "../../utils/sandboxes";
+import { MdCheck, MdClose, MdMoreVert, MdModeEdit } from "react-icons/md";
+import { Link } from "react-router-dom";
+import { useAxios } from "../../hooks/axiosHook";
+import { useToastMessage } from "../../hooks/toastHook";
+import CenterSpinner from "../../components/centerSpinner/CenterSpinner";
+import SandBoxFormDialog from "../../components/SandBox/SandBoxFormDialog";
+import SandBoxUpdateFormDialog from "../../components/SandBox/SandBoxUpdateFormDialog";
 
-function SandboxTable({ sandboxTableList, realmId, realmData }) {
+function SandboxTable({ sandboxTableList, realmId, realmData, handleSandBoxAdd }) {
   const [isLoading, setIsLoading] = useState(false);
   const { getRequest } = useAxios();
   const { errorToastMessage, successToastMessage } = useToastMessage();
   const [sandboxDataFromServer, setSandboxDataFromServer] = useState([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isSandboxUpdateOpen, setIsSandboxUpdateOpen] = useState(false);
+  const [sandBoxId, setSandBoxId] = useState(false);
+  const [isAutoScheduled, setIsAutoScheduled] = useState(false);
+
+  const toggleAddDialog = () => {
+    console.log('sandboxId');
+    setIsOpen((o) => !o);
+  };
+  const toggleUpdateDialog = async (sandboxId, autoSchedule) => {
+    await setSandBoxId(sandboxId);
+    await setIsAutoScheduled(autoSchedule);
+    setIsSandboxUpdateOpen((o) => !o);
+  };
+
+  const handleClose = () => {
+    setIsSandboxUpdateOpen((o) => !o);
+  }
 
   const handleStartAll = async () => {
     setIsLoading(true);
@@ -38,7 +53,7 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
     setIsLoading(false);
     if (res.error) {
       errorToastMessage({
-        title: res.message,
+        title: res.message ?? "Error Occurred, please try again",
       });
       return;
     }
@@ -52,7 +67,7 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
     setIsLoading(false);
     if (res.error) {
       errorToastMessage({
-        title: res.message,
+        title: res.message ?? "Error Occurred, please try again",
       });
       return;
     }
@@ -66,7 +81,7 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
     setIsLoading(false);
     if (res.error) {
       errorToastMessage({
-        title: res.message,
+        title: res.message ?? "Error Occurred, please try again",
       });
       return;
     }
@@ -80,11 +95,11 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
     setIsLoading(false);
     if (res.error) {
       errorToastMessage({
-        title: res.message,
+        title: res.message ?? "Error Occurred, please try again",
       });
       return;
     }
-    successToastMessage({title: 'Data fetched'});
+    successToastMessage({ title: "Data fetched" });
     if (res) {
       setSandboxDataFromServer(res);
     }
@@ -97,7 +112,7 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
     setIsLoading(false);
     if (res.error) {
       errorToastMessage({
-        title: res.message,
+        title: res.message ?? "Error Occurred, please try again",
       });
       return;
     }
@@ -111,7 +126,7 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
     setIsLoading(false);
     if (res.error) {
       errorToastMessage({
-        title: res.message,
+        title: res.message ?? "Error Occurred, please try again",
       });
       return;
     }
@@ -125,7 +140,7 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
     setIsLoading(false);
     if (res.error) {
       errorToastMessage({
-        title: res.message,
+        title: res.message ?? "Error Occurred, please try again",
       });
       return;
     }
@@ -139,10 +154,11 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
     setIsLoading(false);
     if (res.error) {
       errorToastMessage({
-        title: res.message,
+        title: res.message ?? "Error Occurred, please try again",
       });
       return;
     }
+    successToastMessage({ title: `SandBox ${sandboxId} has been reset successfully` });
     window.location.reload();
   };
 
@@ -153,92 +169,195 @@ function SandboxTable({ sandboxTableList, realmId, realmData }) {
     setIsLoading(false);
     if (res.error) {
       errorToastMessage({
-        title: res.message,
+        title: res.message ?? "Error Occurred, please try again",
       });
       return;
     }
+    successToastMessage({ title: `SandBox ${sandboxId} has been deleted successfully` });
     window.location.reload();
+  };
+
+  const handleUpdate = () => {
+    handleSandBoxAdd();
+    toggleAddDialog();
+  };
+
+  const handleUpdateSandBox = () => {
+    handleSandBoxAdd();
+    toggleUpdateDialog();
   };
 
   useEffect(() => {
     setSandboxDataFromServer(sandboxTableList);
-  }, [sandboxTableList])
+  }, [sandboxTableList]);
 
   return (
-    <Box bg='white' border='1px solid' borderColor='gray.300' w='full'>
-      <Box p='4'>
-        <Heading size='lg'>Sandboxes</Heading>
-        <Flex justifyContent='space-between' alignItems='center'>
-          <Flex>
-            <Text mr='2'>Created: {realmData.createdSandboxes}</Text>
-            <Text mr='2'>
-              Active: {realmData.createdSandboxes - realmData.deletedSandboxes}
-            </Text>
-            <Text>Deleted: {realmData.deletedSandboxes}</Text>
+    <Flex
+      flexDir="column"
+      bg="white"
+      w="full"
+      border="1px solid"
+      borderColor="gray.100"
+      overflow="auto"
+      my="1"
+      maxHeight="500px"
+      minW="500px"
+      p="2"
+    >
+      <Grid
+        templateColumns="4fr 1fr 1fr 1fr 4fr 2fr 1fr"
+        templateRows="repeat(auto-fill, 75px)"
+        columnGap="4"
+        rowGap="6"
+        placeItems="start"
+        px="4"
+        boxSizing="border-box"
+        alignItems="center"
+        minW="1000px"
+      >
+        <Box my="4" w="full" gridColumn="1/-1">
+          <Heading size="lg">Sandboxes</Heading>
+          <Flex justifyContent="space-between" alignItems="center" w="full">
+            <Flex w="full">
+              <Text mr="2">Created: {realmData.createdSandboxes}</Text>
+              <Text mr="2">
+                Active:{" "}
+                {realmData.createdSandboxes - realmData.deletedSandboxes}
+              </Text>
+              <Text>Deleted: {realmData.deletedSandboxes}</Text>
+            </Flex>
+            <Flex
+              display={{ base: "none", md: "flex" }}
+              w="full"
+              justifyContent="flex-end"
+            >
+              <IconButton mx="1" onClick={handleRefresh}>
+                <FiRefreshCw />
+              </IconButton>
+              <Button colorScheme="green" mx="1" onClick={toggleAddDialog}>
+                Add Sandbox
+              </Button>
+              <Button colorScheme="twitter" mx="1" onClick={handleRestartAll}>
+                Restart all
+              </Button>
+              <Button colorScheme="twitter" mx="1" onClick={handleStartAll}>
+                Start all
+              </Button>
+              <Button colorScheme="twitter" mx="1" onClick={handleStopAll}>
+                Stop all
+              </Button>
+            </Flex>
+            <Flex display={{ base: "flex", md: "none" }}>
+              <IconButton mx="1" onClick={handleRefresh}>
+                <FiRefreshCw />
+              </IconButton>
+              <Menu>
+                <MenuButton
+                  display="flex"
+                  justifyContent="center"
+                  colorScheme="gray"
+                  as={Button}
+                  px="3"
+                >
+                  <MdMoreVert />
+                </MenuButton>
+                <MenuList>
+                  {/* TODO: fix responsive design for "Add" form */}
+                  {/* <MenuItem onClick={toggleAddDialog}>Add Sandbox</MenuItem> */}
+                  <MenuItem onClick={handleRestartAll}>Restart all</MenuItem>
+                  <MenuItem onClick={handleStartAll}>Start all</MenuItem>
+                  <MenuItem onClick={handleStopAll}>Stop all</MenuItem>
+                </MenuList>
+              </Menu>
+            </Flex>
           </Flex>
-          <Flex>
-            <Button colorScheme='twitter' mx='1' onClick={handleRestartAll}>
-              Restart all
-            </Button>
-            <Button colorScheme='twitter' mx='1' onClick={handleStartAll}>
-              Start all
-            </Button>
-            <Button colorScheme='twitter' mx='1' onClick={handleStopAll}>
-              Stop all
-            </Button>
-            <IconButton mx='1' onClick={handleRefresh}>
-              <FiRefreshCw />
-            </IconButton>
-          </Flex>
-        </Flex>
-      </Box>
-      <Table my='1' overflowY='scroll' maxHeight='500px'>
-        <Thead>
-          <Tr>
-            {tableColumns.map((c, i) => (
-              <Th key={i}>{c}</Th>
-            ))}
-          </Tr>
-        </Thead>
-        <Tbody>
-          {sandboxDataFromServer &&
-            sandboxDataFromServer.map((s) => (
-              <Tr key={s.id}>
-                <Td color="#1da1f2">
-                  <Link to={`/sandbox/${s.id}`}>{s.id}</Link>
-                </Td>
-                <Td>{s.instance}</Td>
-                <Td>{s.state}</Td>
-                <Td>{s.createdBy}</Td>
-                <Td>
-                  {new Intl.DateTimeFormat('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: '2-digit',
-                    hour: 'numeric',
-                    minute: 'numeric',
-                  }).format(new Date(s.createdAt))}
-                </Td>
-                <Td>
-                  <Menu>
-                    <MenuButton>
-                      <MdMoreVert />
-                    </MenuButton>
-                    <MenuList>
-                      <MenuItem onClick={()=>handleStart(s.id)}>Start</MenuItem>
-                      <MenuItem onClick={()=>handleStop(s.id)}>Stop</MenuItem>
-                      <MenuItem onClick={()=>handleRestart(s.id)}>Restart</MenuItem>
-                      <MenuItem onClick={()=>window.confirm('Are you sure you want to reset this sandbox (' + s.instance +  ')?') && handleReset(s.id) }>Reset</MenuItem>
-                      <MenuItem onClick={()=>window.confirm('Are you sure you want to delete this sandbox (' + s.instance +  ')?') && handleDelete(s.id) }>Delete</MenuItem>
-                    </MenuList>
-                  </Menu>
-                </Td>
-              </Tr>
-            ))}
-        </Tbody>
-      </Table>
-      {isLoading && <CenterSpinner/>}
-    </Box>
+        </Box>
+        {tableColumns.map((c, i) => (
+          <Heading key={i} size="sm" mt="2" alignSelf="end">
+            {c}
+          </Heading>
+        ))}
+
+        {sandboxDataFromServer &&
+          sandboxDataFromServer.map((s) => (
+            <React.Fragment key={s.id}>
+              <Text color="#1da1f2">
+                <Link to={`/sandbox/${s.id}`}>{s.id}</Link>
+              </Text>
+              <Text>{s.instance}</Text>
+              <Text>{s.state}</Text>
+              <Text>
+              {s.autoScheduled ? (
+                <Button colorScheme="green" size="sm"><MdCheck color="white" /></Button>
+              ) : (
+                <Button colorScheme="red" size="sm"><MdClose color="white" /></Button>
+              )}
+                <Button colorScheme="twitter" mx="1" size="sm" onClick={() =>toggleUpdateDialog(s.id, s.autoScheduled)}>
+                  <MdModeEdit/>  Edit
+                </Button>
+              </Text>
+              <Text>{s.createdBy}</Text>
+              <Text>
+                {new Intl.DateTimeFormat("en-US", {
+                  year: "numeric",
+                  month: "short",
+                  day: "2-digit",
+                  hour: "numeric",
+                  minute: "numeric",
+                }).format(new Date(s.createdAt))}
+              </Text>
+              <Menu>
+                <MenuButton>
+                  <MdMoreVert />
+                </MenuButton>
+                <MenuList>
+                  <MenuItem onClick={() => handleStart(s.id)}>Start</MenuItem>
+                  <MenuItem onClick={() => handleStop(s.id)}>Stop</MenuItem>
+                  <MenuItem onClick={() => handleRestart(s.id)}>
+                    Restart
+                  </MenuItem>
+                  <MenuItem
+                    onClick={() =>
+                      window.confirm(
+                        "Are you sure you want to reset this sandbox (" +
+                          s.instance +
+                          ")?"
+                      ) && handleReset(s.id)
+                    }
+                  >
+                    Reset
+                  </MenuItem>
+                  <MenuItem
+                    onClick={() =>
+                      window.confirm(
+                        "Are you sure you want to delete this sandbox (" +
+                          s.instance +
+                          ")?"
+                      ) && handleDelete(s.id)
+                    }
+                  >
+                    Delete
+                  </MenuItem>
+                </MenuList>
+              </Menu>
+            </React.Fragment>
+          ))}
+      </Grid>
+      <SandBoxFormDialog
+        isOpen={isOpen}
+        handleClose={toggleAddDialog}
+        realmId={realmId}
+        handleSubmit={handleUpdate}
+      />
+      <SandBoxUpdateFormDialog
+        isOpen={isSandboxUpdateOpen}
+        handleClose={handleClose}
+        sandBoxId={sandBoxId}
+        autoSchedule={isAutoScheduled}
+        handleSubmit={handleUpdateSandBox}
+      />
+      {isLoading && <CenterSpinner />}
+    </Flex>
   );
 }
 

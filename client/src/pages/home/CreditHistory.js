@@ -1,16 +1,11 @@
 import React, { useState } from 'react';
 import {
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  Box,
+  Text,
   Heading,
   Flex,
   Button,
   IconButton,
+  Grid,
 } from '@chakra-ui/react';
 import { MdDelete } from 'react-icons/md';
 import { creditHistoryTableColumns } from '../../utils/sandboxes';
@@ -34,7 +29,7 @@ function CreditHistory({ realmId }) {
       setIsLoading(false);
       if (res.error) {
         errorToastMessage({
-          title: res.message,
+          title: res.message ?? 'Error Occurred, please try again',
         });
         return;
       }
@@ -57,7 +52,7 @@ function CreditHistory({ realmId }) {
     setIsLoading(false);
     if (res.error) {
       errorToastMessage({
-        title: res.message,
+        title: res.message ?? 'Error Occurred, please try again',
       });
       return;
     }
@@ -71,47 +66,66 @@ function CreditHistory({ realmId }) {
   }, [realmId]);
 
   return (
-    <Box bg='white' border='1px solid' borderColor='gray.300' w='full' m='2'>
-      <Flex justifyContent='space-between' alignItems='center' p='4'>
+    <Flex
+      bg='white'
+      w='full'
+      border='1px solid'
+      borderColor='gray.300'
+      overflow='auto'
+      minW='500px'
+      maxH='500px'
+      alignItems='top'
+      flexDir='column'
+      p='2'
+    >
+      <Flex justifyContent='space-between' alignItems='center' py='4'>
         <Heading size='lg'>Credit History</Heading>
         <Button colorScheme='twitter' mx='1' px='10' onClick={toggleDialog}>
           Add
         </Button>
       </Flex>
-      <Table my='1'>
-        <Thead>
-          <Tr>
-            {creditHistoryTableColumns.map((c, i) => (
-              <Th key={i}>{c}</Th>
-            ))}
-          </Tr>
-        </Thead>
-        <Tbody>
-          {credits.map((c, index) => (
-            <Tr key={index}>
-              <Td>{index + 1}</Td>
-              <Td>{c.credit}</Td>
-              <Td>
-                {new Intl.DateTimeFormat('en-US', {
-                  year: 'numeric',
-                  month: 'short',
-                  day: '2-digit',
-                }).format(new Date(c.purchaseDate))}
-              </Td>
-              <Td>{c.autoRenewal=== 1 || c.autoRenewal === '1' ? 'Yes' : 'No'}</Td>
-              <Td fontSize='2rem' color='red.500'>
-                <IconButton
-                  variant='ghost'
-                  fontSize='2xl'
-                  onClick={() => deleteCredit(c)}
-                >
-                  <MdDelete />
-                </IconButton>
-              </Td>
-            </Tr>
-          ))}
-        </Tbody>
-      </Table>
+      <Grid
+        templateColumns='1fr 2fr 2fr 1fr 1fr'
+        templateRows='repeat(auto-fill, 50px)'
+        columnGap='4'
+        rowGap='2'
+        placeItems='start'
+        px='4'
+        boxSizing='border-box'
+        alignItems='center'
+        minW='500px'
+      >
+        {creditHistoryTableColumns.map((c, i) => (
+          <Heading key={i} size='sm' mt='2'>
+            {c}
+          </Heading>
+        ))}
+        {credits.map((c, index) => (
+          <React.Fragment key={index}>
+            <Text>{index + 1}</Text>
+            <Text>{c.credit}</Text>
+            <Text>
+              {new Intl.DateTimeFormat('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: '2-digit',
+              }).format(new Date(c.purchaseDate))}
+            </Text>
+            <Text>
+              {c.autoRenewal === 1 || c.autoRenewal === '1' ? 'Yes' : 'No'}
+            </Text>
+            <Text fontSize='2rem' color='red.500'>
+              <IconButton
+                variant='ghost'
+                fontSize='2xl'
+                onClick={() => deleteCredit(c)}
+              >
+                <MdDelete />
+              </IconButton>
+            </Text>
+          </React.Fragment>
+        ))}
+      </Grid>
       <CreditHistoryFormDialog
         isOpen={isOpen}
         submit={handleSubmit}
@@ -119,7 +133,7 @@ function CreditHistory({ realmId }) {
         realmId={realmId}
       />
       {isLoading && <CenterSpinner />}
-    </Box>
+    </Flex>
   );
 }
 

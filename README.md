@@ -20,12 +20,12 @@ ODS Command Center is built on React + Node.js, leverages SFCC-CI Javascript API
 - Login options: 1 Click login using dw.json, login using API key & user credentials
 - Realm Switcher to render dashboard for selected realm
 - Bulk Operations: Restart, Start, Stop all Sandboxes in a realm
-- Individual operation on ODS: Start, Stop, Restart, Reset, Delete
+- Schedule Sandbox operations: Schedule Start/Stop operations on all Sandboxes of a Realm
+- Individual operation on ODS: Start, Stop, Restart, Reset, Delete, Update COnfiguration
 - Manage Credit History: Add no of credit, Purchase date, Support ticket link for reference, Auto-renewal flag
 - Pie-chart to show Remaning, Uptime, Downtime Credit percent usages
 - Realm Statistics: Active Sandboxes, Credits remaining, Minutes up, Minutes down
 - Details for individual sandbox: Usage history, Operations history, Quick links Minutes up, Minutes down
-- Notification when credit usages hits predefined limit(50%, 75%, 90%).
 
 ## Upcoming Features:
 - User & Role management, for better logging of operations performed and controlling access.
@@ -33,7 +33,6 @@ ODS Command Center is built on React + Node.js, leverages SFCC-CI Javascript API
     - Predicts remaining days of usage based on current up/down time and no of sandboxes
     - Calcule usage percentage based on user input of uptime/downtime(taking weekends into consideration), no of sandboxes
 - Upload dw.json through GUI
-- Schedule Start/Stop operations on individual Sandboxes using GUI
 - Graphical representation of Sandbox usage and operations
 - Notification Center:
     - Manage notification settings, turn-on/off.
@@ -45,31 +44,34 @@ ODS Command Center is built on React + Node.js, leverages SFCC-CI Javascript API
 - Demo mode & Demo site on Heroku using dummy data
 - Caching to avoid frequent API calling
 - Docker container
+- Email Notification when credit usages hits predefined limit(50%, 75%, 90%).
+
 
 # Getting Started
 ## Prepare
 
 - Check Prerequisites in [SFCC-CI repo](https://github.com/SalesforceCommerceCloud/sfcc-ci#configure-an-api-key) to setup your API key and roles. If you still stuck somewhere, I have detailed the steps in this [Medium post](https://sachinupmanyu.medium.com/sfcc-automating-on-demand-sandboxes-53a114d245f0), please check that.
 - Clone or download this repository
-- Create a dw.json file(or copy sample file from docs/dw.json) and put it in server folder, so that we have `server/dw.json`.
+- (Optional) Create a dw.json file(or copy sample file from docs/dw.json) and put it in server folder, so that we have `server/dw.json`.
     - Update dw.json with your API and User credentials.
-    - If you are not familiar with the format, please follow above links for this. There will be an option soon to easily upload dw.json through GUI.
+    - If you are not familiar with the format, please follow above links for this.
 - Copy `docs/database.sqlite3` file and put it in `server/` folder.
-- Create `server/.env` and `client/.env` files using .env.example files in respective folders, update environment variables.
-- Add SMTP details in server/src/routes.js *(optional)*. Alternatively you'll be able to manage this in Notification Center(upcoming)
+- Create `client/.env` file using .env.example file in respective folder, update environment variables.
+
 
 ## Running on Local system
 - We would require NPM to be available on local system, recommended Node version is 12.19.0. If you don't have it already installed check installation instruction for [NVM](https://github.com/nvm-sh/nvm)(recommended, so that you can easilt manage multiple node versions) or install Node.js through [official site](https://nodejs.org/)
-- Go to `<local_folder>` and run `npm run build`, after build process is complete run `npm start` command.
+- Go to `<project_root_folder>` and run `npm run build`, after build process is complete run `npm start` command.
 - goto `localhost:3009` in your web browser.
 - Login using your preferred method.
 
 ## Running on remote server
-You can easily set this up on Heroku or your preferred hosting solution, so that other users can also perform operation, view usage statistics and get notified about relevant information(User & Role management coming soon).
+You can easily set this up on Heroku or your preferred hosting solution, so that other users can also perform operation, view usage statistics and get notified about relevant information.
 
 - Complete the prerequisities.
-- Update `client/.env` and `server/.env` with Production details.
+- Update `client/.env` with Production details.
 - Upload to server
+- To deploy on Heroku, follow the [official guide](https://devcenter.heroku.com/articles/deploying-nodejs).
 
 ## Credits
 ODS Command Center is using [SFCC-CI](https://github.com/SalesforceCommerceCloud/sfcc-ci) Javascript APIs under the hood and was created for Salesforce Community by

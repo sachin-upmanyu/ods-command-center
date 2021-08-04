@@ -9,19 +9,19 @@ const { exit } = require('process');
 require('dotenv').config();
 
 const transporter = nodemailer.createTransport({
-  port: process.env.SMTP_PORT,               // true for 465, false for other ports
+  port: process.env.SMTP_PORT, // true for 465, false for other ports
   host: process.env.SMTP_HOST,
   secure: false,
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
-  tls: { rejectUnauthorized: false }
+  tls: { rejectUnauthorized: false },
 });
 
 const checkisAuth = (req, res, next) => {
   if (req.headers.authorization) {
-    res.status(401).json({ 'message': 'test data' });
+    res.status(401).json({ message: 'test data' });
   }
   next();
 };
@@ -31,26 +31,26 @@ const checkisAuth = (req, res, next) => {
  */
 router.post('/auth/login', async (req, res, next) => {
   try {
+console.log(req.body);
     const filePath = path.resolve(process.cwd(), 'cli.js');
-    const { client, clientSecret } = req.body;
+    const { client } = req.body;
     const child = spawn('node', [
       filePath,
       'auth:login',
       `${client}`,
-      `${clientSecret}`,
     ]);
 
     let requestResult = '';
-    child.stdout.on('data', data => {
+    child.stdout.on('data', (data) => {
       requestResult += data;
     });
 
     let error = false;
-    child.stderr.on('data', data => {
+    child.stderr.on('data', (data) => {
       error = true;
     });
 
-    child.on('close', code => {
+    child.on('close', (code) => {
       if (code || error) {
         next(1);
         return;
@@ -58,7 +58,7 @@ router.post('/auth/login', async (req, res, next) => {
       res.status(200).json(requestResult);
     });
 
-    child.on('error', err => {
+    child.on('error', (err) => {
       res.status(400).json(err);
     });
   } catch (err) {
@@ -84,24 +84,24 @@ router.post('/client/login', async (req, res, next) => {
 
     let returnData = '';
 
-    child.stdout.on('data', data => {
+    child.stdout.on('data', (data) => {
       returnData += data.toString();
     });
 
     let error = false;
-    child.stderr.on('data', data => {
+    child.stderr.on('data', (data) => {
       error = true;
     });
 
-    child.on('close', code => {
+    child.on('close', (code) => {
       if (code || error) {
         next();
         return;
       }
-      res.status(200).json({'login': true, 'token': Math.random(50000)});
+      res.status(200).json({ login: true, token: Math.random(50000) });
     });
 
-    child.on('error', err => {
+    child.on('error', (err) => {
       res.status(400).json(err);
     });
   } catch (err) {
@@ -117,12 +117,12 @@ router.get('/dwjson/login', async (req, res, next) => {
     const filePath = path.resolve(process.cwd(), 'cli.js');
     const child = spawn('node', [filePath, 'client:auth']);
     let returnData = '';
-    child.stdout.on('data', data => {
+    child.stdout.on('data', (data) => {
       returnData += data.toString();
     });
 
     let error = false;
-    child.stderr.on('data', data => {
+    child.stderr.on('data', (data) => {
       if (
         /^[\],:{}\s]*$/.test(
           data
@@ -144,15 +144,15 @@ router.get('/dwjson/login', async (req, res, next) => {
       error = true;
     });
 
-    child.on('close', code => {
+    child.on('close', (code) => {
       if (code || error) {
         next(code);
         return;
       }
-      res.status(200).json({'login': true, 'token': Math.random(50000)});
+      res.status(200).json({ login: true, token: Math.random(50000) });
     });
 
-    child.on('error', err => {
+    child.on('error', (err) => {
       res.status(400).json(err);
     });
   } catch (err) {
@@ -168,14 +168,14 @@ router.get('/logout', async (req, res, next) => {
     const filePath = path.resolve(process.cwd(), 'cli.js');
     const child = spawn('node', [filePath, 'auth:logout']);
 
-    child.stdout.on('data', data => {});
+    child.stdout.on('data', (data) => {});
 
     let error = false;
-    child.stderr.on('data', data => {
+    child.stderr.on('data', (data) => {
       error = true;
     });
 
-    child.on('close', code => {
+    child.on('close', (code) => {
       if (code || error) {
         next(code);
         return;
@@ -183,7 +183,7 @@ router.get('/logout', async (req, res, next) => {
       res.status(200).json(code);
     });
 
-    child.on('error', err => {
+    child.on('error', (err) => {
       res.status(400).json(err);
     });
   } catch (err) {
@@ -200,25 +200,24 @@ router.get('/sandbox/realms/list', async (req, res, next) => {
     var returnData = '';
     const child = spawn('node', [filePath, 'sandbox:realm:list', '-j']);
 
-    child.stdout.on('data', data => {
+    child.stdout.on('data', (data) => {
       returnData += data.toString();
     });
-
     let error = false;
-    child.stderr.on('data', data => {
+    child.stderr.on('data', (data) => {
       error = true;
     });
 
-    child.on('close', code => {
+    child.on('close', (code) => {
       if (code || error) {
         res.status(400);
-        next({'message': 'Error '});
+        next({ message: 'Error ' });
         return;
       }
       res.status(200).json(JSON.parse(returnData));
     });
 
-    child.on('error', err => {
+    child.on('error', (err) => {
       res.status(400).json(err);
     });
   } catch (err) {
@@ -226,6 +225,119 @@ router.get('/sandbox/realms/list', async (req, res, next) => {
   }
 });
 
+/**
+ * Add sandbox
+ */
+router.post('/sandbox/create', async (req, res, next) => {
+  try {
+    const {
+      ttl,
+      realmId,
+      profile,
+      ocapiSettings,
+      webdavSettings,
+      autoSchedule,
+    } = req.body;
+    const filePath = path.resolve(process.cwd(), 'cli.js');
+    var returnData = '', child='';
+
+    if (autoSchedule) {
+      child = spawn('node', [
+          filePath,
+          'sandbox:create',
+          `--ttl=${ttl}`,
+          `--realm=${realmId}`,
+          `--profile=${profile}`,
+          `--auto-scheduled`,
+          '-j',
+        ]);
+    } else {
+      child = spawn('node', [
+          filePath,
+          'sandbox:create',
+          `--ttl=${ttl}`,
+          `--realm=${realmId}`,
+          `--profile=${profile}`,
+          // `--ocapi-settings=${ocapiSettings}`,
+          // `--webdav-settings=${webdavSettings}`,
+          '-j',
+        ]);
+    }
+
+    child.stdout.on('data', (data) => {
+      returnData += data.toString();
+    });
+    let error = false;
+    child.stderr.on('data', (data) => {
+      error = true;
+    });
+
+    child.on('close', (code) => {
+      if (code || error) {
+        res.status(400);
+        next({ message: 'Error ' });
+        return;
+      }
+      res.status(200).json(JSON.parse(returnData));
+    });
+
+    child.on('error', (err) => {
+      res.status(400).json(err);
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+
+/**
+ * Update sandbox
+ */
+ router.patch('/sandbox/update/:sandBoxId', async (req, res, next) => {
+  try {
+    const { sandBoxId } = req.params;
+    const {
+      ttl,
+      autoSchedule,
+    } = req.body;
+    const filePath = path.resolve(process.cwd(), 'cli.js');
+    var returnData = '';
+    // console.log(ttl, autoSchedule, sandBoxId)
+    // res.status(200).json(autoSchedule);
+
+    const child = spawn('node', [
+        filePath,
+        'sandbox:update',
+        `--sandbox=${sandBoxId}`,
+        `--ttl=${ttl}`,
+        `--auto-scheduled=${autoSchedule}`,
+      ]);
+
+
+    child.stdout.on('data', (data) => {
+      returnData += data.toString();
+    });
+    let error = false;
+    child.stderr.on('data', (data) => {
+      error = true;
+    });
+
+    child.on('close', (code) => {
+      if (code || error) {
+        res.status(400);
+        next({ message: 'Error ' });
+        return;
+      }
+      res.status(200).json(returnData);
+    });
+
+    child.on('error', (err) => {
+      res.status(400).json(err);
+    });
+  } catch (err) {
+    next(err);
+  }
+});
 /**
  * Get realm usages
  */
@@ -247,16 +359,16 @@ router.get('/sandbox/realms/list/:realmId/:topic', async (req, res, next) => {
     ]);
     var returnData = '';
 
-    child.stdout.on('data', data => {
+    child.stdout.on('data', (data) => {
       returnData += data.toString();
     });
 
     let error = false;
-    child.stderr.on('data', data => {
+    child.stderr.on('data', (data) => {
       error = true;
     });
 
-    child.on('close', code => {
+    child.on('close', (code) => {
       if (code || error) {
         next();
         return;
@@ -264,7 +376,95 @@ router.get('/sandbox/realms/list/:realmId/:topic', async (req, res, next) => {
       res.status(200).json(JSON.parse(returnData));
     });
 
-    child.on('error', err => {
+    child.on('error', (err) => {
+      res.status(400).json(err);
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * Get realm configuration
+ */
+router.get('/sandbox/realm/config/:realmId', async (req, res, next) => {
+  try {
+    const { realmId } = req.params;
+
+    const filePath = path.resolve(process.cwd(), 'cli.js');
+    const child = spawn('node', [
+      filePath,
+      'sandbox:realm:list',
+      `--realm=${realmId}`,
+      `--show-config`,
+      '-j',
+    ]);
+    var returnData = '';
+
+    child.stdout.on('data', (data) => {
+      returnData += data.toString();
+    });
+
+    let error = false;
+    child.stderr.on('data', (data) => {
+      error = true;
+    });
+
+    child.on('close', (code) => {
+      if (code || error) {
+        next();
+        return;
+      }
+      res.status(200).json(JSON.parse(returnData));
+    });
+
+    child.on('error', (err) => {
+      res.status(400).json(err);
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// update realm configuration
+router.patch('/sandbox/realm/config/update', async (req, res, next) => {
+  try {
+    const filePath = path.resolve(process.cwd(), 'cli.js');
+    const { formArr, maxSandboxTtl, defaultSandboxTtl } = req.body;
+    // res.status(200).json({ login: true, token: Math.random(50000) });
+    let schedule = formArr.schedule;
+    let realmId = formArr.realmId;
+    const child = spawn('node', [
+      filePath,
+      'sandbox:realm:update',
+      `--realm=${realmId}`,
+      `--max-sandbox-ttl=${maxSandboxTtl}`,
+      `--default-sandbox-ttl=${defaultSandboxTtl}`,
+      `--schedule=${JSON.stringify(schedule)}`,
+      '-j',
+    ]);
+
+    let returnData = '';
+
+    child.stdout.on('data', (data) => {
+      returnData += data.toString();
+    });
+
+    let error = false;
+    child.stderr.on('data', (data) => {
+      error = true;
+    });
+
+    child.on('close', (code) => {
+      if (code || error) {
+        next();
+        return;
+      }
+      // res.status(200).json(JSON.parse(returnData));
+      res.status(200).send(returnData);
+    });
+
+    child.on('error', (err) => {
       res.status(400).json(err);
     });
   } catch (err) {
@@ -278,25 +478,25 @@ router.get('/sandbox/list', async (req, res, next) => {
     const filePath = path.resolve(process.cwd(), 'cli.js');
     const child = spawn('node', [filePath, 'sandbox:list', `-j`]);
     var returnData = '';
-    child.stdout.on('data', data => {
+    child.stdout.on('data', (data) => {
       returnData += data.toString();
     });
 
     let error = false;
-    child.stderr.on('data', data => {
+    child.stderr.on('data', (data) => {
       error = true;
     });
 
-    child.on('close', code => {
+    child.on('close', (code) => {
       if (code || error) {
-        next({'message': 'Error '});
+        next({ message: 'Error ' });
         // next();
         return;
       }
       res.status(200).json(JSON.parse(returnData));
     });
 
-    child.on('error', err => {
+    child.on('error', (err) => {
       res.status(400).json(err);
     });
   } catch (err) {
@@ -321,22 +521,22 @@ router.get('/sandbox/list/:deleted', async (req, res, next) => {
       '--show-deleted',
     ]);
 
-    child.stdout.on('data', data => {
+    child.stdout.on('data', (data) => {
       returnData += data.toString();
     });
     let error = false;
-    child.stderr.on('data', data => {
+    child.stderr.on('data', (data) => {
       error = true;
     });
 
-    child.on('close', code => {
+    child.on('close', (code) => {
       if (code || error) {
         next();
         return;
       }
       res.status(200).json(JSON.parse(returnData));
     });
-    child.on('error', err => {
+    child.on('error', (err) => {
       res.status(400).json(err);
     });
   } catch (err) {
@@ -364,23 +564,23 @@ router.get('/sandbox/stats/:id/:topic', async (req, res, next) => {
       '-j',
     ]);
 
-    child.stdout.on('data', data => {
+    child.stdout.on('data', (data) => {
       returnData += data.toString();
     });
 
     let error = false;
-    child.stderr.on('data', data => {
+    child.stderr.on('data', (data) => {
       error = true;
     });
 
-    child.on('close', code => {
+    child.on('close', (code) => {
       if (code || error) {
         next();
         return;
       }
       res.status(200).json(JSON.parse(returnData));
     });
-    child.on('error', err => {
+    child.on('error', (err) => {
       res.status(400).json(err);
     });
   } catch (err) {
@@ -396,23 +596,23 @@ router.get('/sandbox/start/:id', async (req, res, next) => {
     const child = spawn('node', [filePath, 'sandbox:start', `--sandbox=${id}`]);
     var returnData = '';
 
-    child.stdout.on('data', data => {
+    child.stdout.on('data', (data) => {
       returnData += data.toString();
     });
 
     let error = false;
-    child.stderr.on('data', data => {
+    child.stderr.on('data', (data) => {
       error = true;
     });
 
-    child.on('close', code => {
+    child.on('close', (code) => {
       if (code || error) {
         next();
         return;
       }
       res.status(200).json(returnData);
     });
-    child.on('error', err => {
+    child.on('error', (err) => {
       res.status(400).json(err);
     });
   } catch (err) {
@@ -428,22 +628,22 @@ router.get('/sandbox/stop/:id', async (req, res, next) => {
     const child = spawn('node', [filePath, 'sandbox:stop', `--sandbox=${id}`]);
     var returnData = '';
 
-    child.stdout.on('data', data => {
+    child.stdout.on('data', (data) => {
       returnData += data.toString();
     });
     let error = false;
-    child.stderr.on('data', data => {
+    child.stderr.on('data', (data) => {
       error = true;
     });
 
-    child.on('close', code => {
+    child.on('close', (code) => {
       if (code || error) {
         next();
         return;
       }
       res.status(200).json(returnData);
     });
-    child.on('error', err => {
+    child.on('error', (err) => {
       res.status(400).json(err);
     });
   } catch (err) {
@@ -456,25 +656,29 @@ router.get('/sandbox/restart/:id', async (req, res, next) => {
   try {
     const { id } = req.params;
     const filePath = path.resolve(process.cwd(), 'cli.js');
-    const child = spawn('node', [filePath, 'sandbox:restart', `--sandbox=${id}`]);
+    const child = spawn('node', [
+      filePath,
+      'sandbox:restart',
+      `--sandbox=${id}`,
+    ]);
     var returnData = '';
 
-    child.stdout.on('data', data => {
+    child.stdout.on('data', (data) => {
       returnData += data.toString();
     });
     let error = false;
-    child.stderr.on('data', data => {
+    child.stderr.on('data', (data) => {
       error = true;
     });
 
-    child.on('close', code => {
+    child.on('close', (code) => {
       if (code || error) {
         next();
         return;
       }
       res.status(200).json(returnData);
     });
-    child.on('error', err => {
+    child.on('error', (err) => {
       res.status(400).json(err);
     });
   } catch (err) {
@@ -487,25 +691,30 @@ router.get('/sandbox/reset/:id', async (req, res, next) => {
   try {
     const { id } = req.params;
     const filePath = path.resolve(process.cwd(), 'cli.js');
-    const child = spawn('node', [filePath, 'sandbox:reset', `--sandbox=${id}`]);
+    const child = spawn('node', [
+      filePath,
+      'sandbox:reset',
+      `--sandbox=${id}`,
+      `--noprompt`,
+    ]);
     var returnData = '';
 
-    child.stdout.on('data', data => {
+    child.stdout.on('data', (data) => {
       returnData += data.toString();
     });
     let error = false;
-    child.stderr.on('data', data => {
+    child.stderr.on('data', (data) => {
       error = true;
     });
 
-    child.on('close', code => {
+    child.on('close', (code) => {
       if (code || error) {
         next();
         return;
       }
       res.status(200).json(returnData);
     });
-    child.on('error', err => {
+    child.on('error', (err) => {
       res.status(400).json(err);
     });
   } catch (err) {
@@ -518,25 +727,30 @@ router.get('/sandbox/delete/:id', async (req, res, next) => {
   try {
     const { id } = req.params;
     const filePath = path.resolve(process.cwd(), 'cli.js');
-    const child = spawn('node', [filePath, 'sandbox:delete', `--sandbox=${id}`]);
+    const child = spawn('node', [
+      filePath,
+      'sandbox:delete',
+      `--sandbox=${id}`,
+      `--noprompt`,
+    ]);
     var returnData = '';
 
-    child.stdout.on('data', data => {
+    child.stdout.on('data', (data) => {
       returnData += data.toString();
     });
     let error = false;
-    child.stderr.on('data', data => {
+    child.stderr.on('data', (data) => {
       error = true;
     });
 
-    child.on('close', code => {
+    child.on('close', (code) => {
       if (code || error) {
         next();
         return;
       }
       res.status(200).json(returnData);
     });
-    child.on('error', err => {
+    child.on('error', (err) => {
       res.status(400).json(err);
     });
   } catch (err) {
@@ -558,23 +772,23 @@ router.get('/sandbox/link/:id', async (req, res, next) => {
       '-j',
     ]);
 
-    child.stdout.on('data', data => {
+    child.stdout.on('data', (data) => {
       returnData += data.toString();
     });
 
     let error = false;
-    child.stderr.on('data', data => {
+    child.stderr.on('data', (data) => {
       error = true;
     });
 
-    child.on('close', code => {
+    child.on('close', (code) => {
       if (code || error) {
         next(error);
         return;
       }
       res.status(200).json(JSON.parse(returnData));
     });
-    child.on('error', err => {
+    child.on('error', (err) => {
       res.status(400).json(err);
     });
   } catch (err) {
@@ -585,19 +799,20 @@ router.get('/sandbox/link/:id', async (req, res, next) => {
 // start sandbox
 router.get('/sandbox/start-all/:realmId', async (req, res, next) => {
   try {
-    const { realmId } = req.params;const filePath = path.resolve(process.cwd(), 'cli.js');
+    const { realmId } = req.params;
+    const filePath = path.resolve(process.cwd(), 'cli.js');
     const child = spawn('node', [filePath, 'sandbox:list', `-j`]);
     var realmData = '';
-    child.stdout.on('data', data => {
+    child.stdout.on('data', (data) => {
       realmData += data.toString();
     });
 
     let error = false;
-    child.stderr.on('data', data => {
+    child.stderr.on('data', (data) => {
       error = true;
     });
 
-    child.on('close', code => {
+    child.on('close', (code) => {
       if (code || error) {
         next();
         return;
@@ -605,17 +820,21 @@ router.get('/sandbox/start-all/:realmId', async (req, res, next) => {
       realmData = JSON.parse(realmData);
       var returnData = '';
       var id = '';
-      realmData.forEach(sandbox => {
+      realmData.forEach((sandbox) => {
         if (sandbox.realm === realmId) {
           const filePath = path.resolve(process.cwd(), 'cli.js');
           id = sandbox.id;
-          const child = spawn('node', [filePath, 'sandbox:start', `--sandbox=${id}`]);
-          child.stdout.on('data', data => {
+          const child = spawn('node', [
+            filePath,
+            'sandbox:start',
+            `--sandbox=${id}`,
+          ]);
+          child.stdout.on('data', (data) => {
             returnData += data.toString();
           });
         }
       });
-      child.on('close', code => {
+      child.on('close', (code) => {
         if (code || error) {
           next();
           return;
@@ -624,7 +843,7 @@ router.get('/sandbox/start-all/:realmId', async (req, res, next) => {
       });
       res.status(200).json(realmData);
     });
-    child.on('error', err => {
+    child.on('error', (err) => {
       res.status(400).json(err);
     });
   } catch (err) {
@@ -634,19 +853,20 @@ router.get('/sandbox/start-all/:realmId', async (req, res, next) => {
 // stop sandbox
 router.get('/sandbox/stop-all/:realmId', async (req, res, next) => {
   try {
-    const { realmId } = req.params;const filePath = path.resolve(process.cwd(), 'cli.js');
+    const { realmId } = req.params;
+    const filePath = path.resolve(process.cwd(), 'cli.js');
     const child = spawn('node', [filePath, 'sandbox:list', `-j`]);
     var realmData = '';
-    child.stdout.on('data', data => {
+    child.stdout.on('data', (data) => {
       realmData += data.toString();
     });
 
     let error = false;
-    child.stderr.on('data', data => {
+    child.stderr.on('data', (data) => {
       error = true;
     });
 
-    child.on('close', code => {
+    child.on('close', (code) => {
       if (code || error) {
         next();
         return;
@@ -654,17 +874,21 @@ router.get('/sandbox/stop-all/:realmId', async (req, res, next) => {
       realmData = JSON.parse(realmData);
       var returnData = '';
       var id = '';
-      realmData.forEach(sandbox => {
+      realmData.forEach((sandbox) => {
         if (sandbox.realm === realmId) {
           const filePath = path.resolve(process.cwd(), 'cli.js');
           id = sandbox.id;
-          const child = spawn('node', [filePath, 'sandbox:stop', `--sandbox=${id}`]);
-          child.stdout.on('data', data => {
+          const child = spawn('node', [
+            filePath,
+            'sandbox:stop',
+            `--sandbox=${id}`,
+          ]);
+          child.stdout.on('data', (data) => {
             returnData += data.toString();
           });
         }
       });
-      child.on('close', code => {
+      child.on('close', (code) => {
         if (code || error) {
           next();
           return;
@@ -673,7 +897,7 @@ router.get('/sandbox/stop-all/:realmId', async (req, res, next) => {
       });
       res.status(200).json(realmData);
     });
-    child.on('error', err => {
+    child.on('error', (err) => {
       res.status(400).json(err);
     });
   } catch (err) {
@@ -684,19 +908,20 @@ router.get('/sandbox/stop-all/:realmId', async (req, res, next) => {
 // restart sandbox
 router.get('/sandbox/restart-all/:realmId', async (req, res, next) => {
   try {
-    const { realmId } = req.params;const filePath = path.resolve(process.cwd(), 'cli.js');
+    const { realmId } = req.params;
+    const filePath = path.resolve(process.cwd(), 'cli.js');
     const child = spawn('node', [filePath, 'sandbox:list', `-j`]);
     var realmData = '';
-    child.stdout.on('data', data => {
+    child.stdout.on('data', (data) => {
       realmData += data.toString();
     });
 
     let error = false;
-    child.stderr.on('data', data => {
+    child.stderr.on('data', (data) => {
       error = true;
     });
 
-    child.on('close', code => {
+    child.on('close', (code) => {
       if (code || error) {
         next();
         return;
@@ -704,17 +929,21 @@ router.get('/sandbox/restart-all/:realmId', async (req, res, next) => {
       realmData = JSON.parse(realmData);
       var returnData = '';
       var id = '';
-      realmData.forEach(sandbox => {
+      realmData.forEach((sandbox) => {
         if (sandbox.realm === realmId) {
           const filePath = path.resolve(process.cwd(), 'cli.js');
           id = sandbox.id;
-          const child = spawn('node', [filePath, 'sandbox:restart', `--sandbox=${id}`]);
-          child.stdout.on('data', data => {
+          const child = spawn('node', [
+            filePath,
+            'sandbox:restart',
+            `--sandbox=${id}`,
+          ]);
+          child.stdout.on('data', (data) => {
             returnData += data.toString();
           });
         }
       });
-      child.on('close', code => {
+      child.on('close', (code) => {
         if (code || error) {
           next();
           return;
@@ -723,7 +952,7 @@ router.get('/sandbox/restart-all/:realmId', async (req, res, next) => {
       });
       res.status(200).json(realmData);
     });
-    child.on('error', err => {
+    child.on('error', (err) => {
       res.status(400).json(err);
     });
   } catch (err) {
@@ -734,14 +963,25 @@ router.get('/sandbox/restart-all/:realmId', async (req, res, next) => {
 // create an api to add the credit history
 router.post('/credit/add', async (req, res, next) => {
   try {
-    const { credit, realmId, purchaseDate, linkToTicket, autoRenewal } = req.body;
+    const { credit, realmId, purchaseDate, linkToTicket, autoRenewal } =
+      req.body;
     var notifyCheck = 0;
-    return db.Credit.create({ credit, realmId, purchaseDate, linkToTicket, autoRenewal })
-    .then((creditData) => res.status(200).json(creditData))
-    .catch((err) => {
-      console.log('***There was an error creating a credit', JSON.stringify(credit))
-      res.status(400).json(err)
-    });
+    return db.Credit.create({
+      credit,
+      realmId,
+      purchaseDate,
+      linkToTicket,
+      autoRenewal,
+      notifyCheck,
+    })
+      .then((creditData) => res.status(200).json(creditData))
+      .catch((err) => {
+        console.log(
+          '***There was an error creating a credit',
+          JSON.stringify(credit),
+        );
+        res.status(400).json(err);
+      });
   } catch (err) {
     next(err);
   }
@@ -752,22 +992,21 @@ router.get('/credit/get-list/:realmId', async (req, res, next) => {
   try {
     //id is realm id
     const { realmId } = req.params;
-    if (process.env.DEMO_MODE === 'On') {
-      var dataList = [{'id': 1, 'credit':121, 'purchaseDate': Date.now()}, {'id': 2, 'credit':145, 'purchaseDate': Date.now()}, {'id': 3, 'credit':1212, 'purchaseDate': Date.now()}];
-      res.status(200).json(dataList);
-    } else {
-      return db.Credit.findAll({
-        where: {
-          realmId: realmId
-        }
-      })
+
+    return db.Credit.findAll({
+      where: {
+        realmId: realmId,
+      },
+    })
       .then((credits) => res.status(200).json(credits))
       .catch((err) => {
-        console.log('There was an error querying credits', JSON.stringify(err))
-        res.status(400).json('Error')
+        console.log(
+          'There was an error querying credits',
+          JSON.stringify(err),
+        );
+        res.status(400).json('Error');
         // return res.send(err)
       });
-    }
   } catch (err) {
     next(err);
   }
@@ -779,15 +1018,21 @@ router.delete('/credit/delete/:creditId', async (req, res, next) => {
     var id = parseInt(req.params.creditId);
     return db.Credit.findOne({
       where: {
-        id: id
-      }
+        id: id,
+      },
     })
-    .then((credit) => credit.destroy())
-    .then(() => res.status(200).json({'message' : 'Credit has been deleted successfully'}))
-    .catch((err) => {
-      console.log('***Error deleting credit', JSON.stringify(err))
-      res.status(400).json({'message' : 'Error in deleting, please try again'});
-    });
+      .then((credit) => credit.destroy())
+      .then(() =>
+        res
+          .status(200)
+          .json({ message: 'Credit has been deleted successfully' }),
+      )
+      .catch((err) => {
+        console.log('***Error deleting credit', JSON.stringify(err));
+        res
+          .status(400)
+          .json({ message: 'Error in deleting, please try again' });
+      });
   } catch (err) {
     console.log(err);
     next(err);
@@ -806,57 +1051,68 @@ router.get('/credits-usage/:realmId', async (req, res, next) => {
         [sequelize.fn('sum', sequelize.col('credit')), 'total_credits'],
       ],
       where: {
-        realmId: realmId
+        realmId: realmId,
       },
       group: ['realmId'],
     })
-    .then((credits) => {
-      //call realms/list/zzrq/usage : line no 218
+      .then((credits) => {
+        //call realms/list/zzrq/usage : line no 218
 
-      const filePath = path.resolve(process.cwd(), 'cli.js');
-      const child = spawn('node', [
-        filePath,
-        'sandbox:realm:list',
-        `--realm=${realmId}`,
-        '--show-usage',
-        '-j',
-      ]);
-      var returnData = '';
+        const filePath = path.resolve(process.cwd(), 'cli.js');
+        const child = spawn('node', [
+          filePath,
+          'sandbox:realm:list',
+          `--realm=${realmId}`,
+          '--show-usage',
+          '-j',
+        ]);
+        var returnData = '';
 
-      child.stdout.on('data', data => {
-        returnData += data.toString();
-      });
-      let error = false;
-      child.stderr.on('data', data => {
-        error = true;
-      });
+        child.stdout.on('data', (data) => {
+          returnData += data.toString();
+        });
+        let error = false;
+        child.stderr.on('data', (data) => {
+          error = true;
+        });
 
-      child.on('close', code => {
-        if (code || error) {
-          next();
-          return;
-        }
-        let realmData = JSON.parse(returnData);
-        let creditListData, remainingCredits, remainingCreditPercent;
-        if (credits && credits[0]) {
-          creditListData = credits[0].toJSON();
-          remainingCredits = creditListData.total_credits - (realmData.minutesUp + realmData.minutesDown * 0.3);
-          remainingCreditPercent = ((creditListData.total_credits - remainingCredits)/creditListData.total_credits)*100;
-        } else {
-          remainingCredits = 0 - (realmData.minutesUp + realmData.minutesDown * 0.3);
-          remainingCreditPercent = 0;
-        }
-        // calulate the remaining credit percent
-        res.status(200).json({'remainingCredits' : remainingCredits, 'creditList': creditListData, 'remainingCreditPercent':remainingCreditPercent, 'returnData': realmData});
+        child.on('close', (code) => {
+          if (code || error) {
+            next();
+            return;
+          }
+          let realmData = JSON.parse(returnData);
+          let creditListData, remainingCredits, remainingCreditPercent;
+          if (credits && credits[0]) {
+            creditListData = credits[0].toJSON();
+            remainingCredits =
+              creditListData.total_credits -
+              (realmData.minutesUp + realmData.minutesDown * 0.3);
+            remainingCreditPercent =
+              ((creditListData.total_credits - remainingCredits) /
+                creditListData.total_credits) *
+              100;
+          } else {
+            remainingCredits =
+              0 - (realmData.minutesUp + realmData.minutesDown * 0.3);
+            remainingCreditPercent = 0;
+          }
+          // calculate the remaining credit percent
+          res.status(200).json({
+            remainingCredits: remainingCredits,
+            creditList: creditListData,
+            remainingCreditPercent: remainingCreditPercent,
+            returnData: realmData,
+          });
+        });
+      })
+      .catch((err) => {
+        console.log('There was an error querying credits', JSON.stringify(err));
+        res.status(400).json({ error: true, message: 'Bad Request' });
       });
-    })
-    .catch((err) => {
-      console.log('There was an error querying credits', JSON.stringify(err))
-      res.status(400).json('Error')
-    });
     //calculate credits from the sandox data
   } catch (err) {
-      next(err);
+    next(err);
   }
 });
 
@@ -864,45 +1120,145 @@ router.get('/credits-usage/:realmId', async (req, res, next) => {
 router.get('/notify-user', async (req, res, next) => {
   try {
     //fetch credits list from DB functionality
-    const creditList = db.Credit.findAll({
-      order: [
-          ['id', 'DESC'],
-      ],
+    realmId = 'bfxt';
+
+    //fetch credits list from DB functionality
+    const creditList = await db.Credit.findAll({
       attributes: [
-        [db.sequelize.fn('DISTINCT', db.sequelize.col('realmId')), 'realmId'],
-        'notifyCheck',
+        'realmId',
+        [sequelize.fn('sum', sequelize.col('credit')), 'total_credits'],
       ],
-    }).then(function(data){
-      var cron_time_check_arr = [50, 75, 90, 95, 99];
-      data.forEach(element => {
-        var creditListData = element.toJSON();
-        var dataKey = cron_time_check_arr.findIndex(keyVal => keyVal === element.notifyCheck);
-        if (element.notifyCheck < cron_time_check_arr[dataKey] && realmId == element.realmId) {
-          //send email to the user to notify that cron_time_check_arr[dataKey] time is consumed.
-          const mailData = {
-            from: process.env.EMAIL_ADDRESS,  // sender address
-            to: process.env.EMAIL_ADDRESS,   // list of receivers
-            subject: 'Realm Credit Usage Notification',
-            text: 'You have consumed '+cron_time_check_arr[dataKey],
-            html: '<b>Hey there! </b> <br> You have consumed '+cron_time_check_arr[dataKey]+'<br/>',
-          };
-          transporter.sendMail(mailData, function (err, info) {
-            if(err) console.log(err)
-          });
-          //update notifyCheck to realm_a_time_consumed
-          res.status(200).json({'realmId':realmId});
-        } else {
-          res.status(200).json(dataKey);
-        }
-        res.status(200).json({'realmId':creditListData});
-      });
+      where: {
+        realmId: realmId,
+      },
+      group: ['realmId'],
     })
-    .catch((err) => {
-      console.log('There was an error querying credits', JSON.stringify(err))
-      res.status(400).json('Error')
-    });
+      .then((credits) => {
+        //call realms/list/zzrq/usage : line no 218
+
+        const filePath = path.resolve(process.cwd(), 'cli.js');
+        const child = spawn('node', [
+          filePath,
+          'sandbox:realm:list',
+          `--realm=${realmId}`,
+          '--show-usage',
+          '-j',
+        ]);
+        var returnData = '';
+
+        child.stdout.on('data', (data) => {
+          returnData += data.toString();
+        });
+        let error = false;
+        child.stderr.on('data', (data) => {
+          error = true;
+        });
+
+        child.on('close', (code) => {
+          if (code || error) {
+            next();
+            return;
+          }
+          let realmData = JSON.parse(returnData);
+          let creditListData, remainingCredits, remainingCreditPercent;
+          if (credits && credits[0]) {
+            creditListData = credits[0].toJSON();
+            remainingCredits =
+              creditListData.total_credits -
+              (realmData.minutesUp + realmData.minutesDown * 0.3);
+            remainingCreditPercent =
+              ((creditListData.total_credits - remainingCredits) /
+                creditListData.total_credits) *
+              100;
+          } else {
+            remainingCredits =
+              0 - (realmData.minutesUp + realmData.minutesDown * 0.3);
+            remainingCreditPercent = 0;
+          }
+          // calculate the remaining credit percent
+          const creditListNew = db.Credit.findOne({
+            where: {
+              realmId: realmId,
+            },
+            order: [['id', 'DESC']],
+          })
+            .then(function (data) {
+              var cron_time_check_arr = JSON.parse(
+                process.env.CRON_NOTIFICATION,
+              );
+              var creditListData = data.toJSON();
+              let usedCreditPercent = remainingCreditPercent;
+              if (
+                usedCreditPercent &&
+                usedCreditPercent > creditListData.notifyCheck
+              ) {
+                var dataKey = cron_time_check_arr.findIndex(
+                  (keyVal) => parseInt(keyVal) === parseInt(usedCreditPercent),
+                );
+                console.log(
+                  dataKey,
+                  parseInt(usedCreditPercent),
+                  usedCreditPercent,
+                  creditListData.notifyCheck,
+                  cron_time_check_arr[dataKey],
+                );
+                if (
+                  dataKey >= 0 &&
+                  creditListData.notifyCheck != cron_time_check_arr[dataKey]
+                ) {
+                  console.log('----------------------------------', dataKey);
+                  // if (
+                  //   creditListData.notifyCheck <=
+                  //     cron_time_check_arr[dataKey] &&
+                  //   realmId == creditListData.realmId
+                  // ) {
+                  // send email to the user to notify that cron_time_check_arr[dataKey] time is consumed.
+                  const mailData = {
+                    from: process.env.EMAIL_ADDRESS, // sender address
+                    to: process.env.EMAIL_ADDRESS, // list of receivers
+                    subject: 'Realm Credit Usage Notification',
+                    text: 'You have consumed ' + cron_time_check_arr[dataKey],
+                    html:
+                      '<b>Hi, </b> <br/> You have consumed ' +
+                      cron_time_check_arr[dataKey] +
+                      '% of your alloted sandbox credits. <br/> ',
+                  };
+                  transporter.sendMail(mailData, function (err, info) {
+                    if (err) console.log(err);
+                  });
+                  //update notifyCheck to realm_a_time_consumed
+                  let updateQuery = db.Credit.update(
+                    {
+                      notifyCheck: cron_time_check_arr[dataKey],
+                    },
+                    { where: { id: data.id } },
+                  ).then(function () {
+                    // update callback
+                  });
+                  res.status(200).json({ realmId: realmId });
+                }
+              }
+            })
+            .catch((err) => {
+              console.log(
+                'There was an error querying credits',
+                err,
+                JSON.stringify(err),
+              );
+              res.status(400).json('Error');
+            });
+
+          res.status(200).json({
+            remainingCreditPercent: 100 - remainingCreditPercent,
+          });
+        });
+      })
+      .catch((err) => {
+        console.log('There was an error querying credits', JSON.stringify(err));
+        res.status(400).json({ error: true, message: 'Bad Request' });
+      });
   } catch (err) {
-    console.log(err)
+    console.log(err);
     next(err);
   }
 });
