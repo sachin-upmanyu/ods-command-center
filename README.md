@@ -27,25 +27,6 @@ ODS Command Center is built on React + Node.js, leverages SFCC-CI Javascript API
 - Realm Statistics: Active Sandboxes, Credits remaining, Minutes up, Minutes down
 - Details for individual sandbox: Usage history, Operations history, Quick links Minutes up, Minutes down
 
-## Upcoming Features:
-- User & Role management, for better logging of operations performed and controlling access.
-- Usage Calculator:
-    - Predicts remaining days of usage based on current up/down time and no of sandboxes
-    - Calcule usage percentage based on user input of uptime/downtime(taking weekends into consideration), no of sandboxes
-- Upload dw.json through GUI
-- Graphical representation of Sandbox usage and operations
-- Notification Center:
-    - Manage notification settings, turn-on/off.
-    - Slack and SMS notifications
-    - Manage contacts who should be notified
-    - Manage SMTP, SMS configurations through GUI
-    - Notifications for critical operations(Delete, Reset Sandboxes)
-- Log file for debbugging
-- Demo mode & Demo site on Heroku using dummy data
-- Caching to avoid frequent API calling
-- Docker container
-- Email Notification when credit usages hits predefined limit(50%, 75%, 90%).
-
 
 # Getting Started
 ## Prepare
